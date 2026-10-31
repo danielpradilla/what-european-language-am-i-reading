@@ -14,10 +14,10 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="game-style.css?v=20261031n">
+  <link rel="stylesheet" href="game-style.css?v=20261031p">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700&family=Noto+Sans+Armenian:wght@700&family=Noto+Sans+Georgian:wght@700&family=Noto+Sans+Hebrew:wght@700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=20261031n">
-  <script type="module" src="src/europe/main.js?v=20261031n"></script>
+  <link rel="stylesheet" href="styles.css?v=20261031p">
+  <script type="module" src="src/europe/main.js?v=20261031p"></script>
 </head>
 <body>
   <svg class="ink-defs" aria-hidden="true" focusable="false">
@@ -119,9 +119,10 @@
     <section class="panel board-panel" aria-label="Europe line map">
       <div class="hud" id="hud" hidden></div>
       <div class="board-wrap" id="board-wrap">
-        <svg id="board" tabindex="0" role="application" aria-label="Europe line map with 106 language stations. Use the arrow keys to move between neighbouring stations, Enter to open one, O for an overview, plus and minus to zoom."></svg>
+        <div id="board" tabindex="0" role="application" aria-label="Europe line map with 106 language stations. Use the arrow keys to move between neighbouring stations, Enter to open one, O for an overview, plus and minus to zoom."></div>
         <svg id="minimap" aria-hidden="true"></svg>
         <div class="board-tools">
+          <label class="choice board-map"><input class="toggle" type="checkbox" role="switch" id="board-map"> Map</label>
           <button class="btn btn-small" type="button" id="btn-overview" title="Overview (O)">Overview</button>
           <button class="btn btn-small" type="button" id="btn-zoom-in" aria-label="Zoom in" title="Zoom in (+)">+</button>
           <button class="btn btn-small" type="button" id="btn-zoom-out" aria-label="Zoom out" title="Zoom out (-)">&minus;</button>
@@ -207,6 +208,7 @@
         <label class="choice"><input class="toggle" type="checkbox" role="switch" id="opt-sound"> Sound <kbd>M</kbd></label>
         <label class="choice"><input class="toggle" type="checkbox" role="switch" id="opt-reduced"> Reduced motion</label>
         <label class="choice"><input class="toggle" type="checkbox" role="switch" id="opt-shake"> Screen shake</label>
+        <label class="choice"><input class="toggle" type="checkbox" role="switch" id="opt-map"> Map</label>
       </div>
       <div class="row"><button class="btn btn-primary" type="button" id="opt-done">Done</button></div>
     </div>

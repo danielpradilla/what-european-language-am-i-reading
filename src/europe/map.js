@@ -1,4 +1,5 @@
 // Europe line map: scenery, lines, stations with flags, labels, camera and minimap (SPEC 16).
+// The camera is a CSS transform on an HTML layer holding the world-sized SVG, so panning never relayouts or repaints it.
 const NS = 'http://www.w3.org/2000/svg';
 export const U = 36; // world units per grid unit
 const X0 = -2, Y0 = -2, X1 = 56, Y1 = 43; // grid window drawn
@@ -36,7 +37,12 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
 
   // ---------- scenery ----------
   svg.textContent = '';
-  const defs = el('defs', {}, svg);
+  const layer = document.createElement('div');
+  layer.className = 'cam';
+  layer.style.width = `${WORLD.w}px`; layer.style.height = `${WORLD.h}px`;
+  svg.append(layer);
+  const gCam = el('svg', { viewBox: `0 0 ${WORLD.w} ${WORLD.h}` }, layer);
+  const defs = el('defs', {}, gCam);
   el('clipPath', { id: 'eu-clip' }, defs).append(el('rect', { width: WORLD.w, height: WORLD.h }));
   const dots = el('pattern', { id: 'eu-dots', width: 9, height: 9, patternUnits: 'userSpaceOnUse' }, defs);
   el('circle', { cx: 2.5, cy: 2.5, r: 1.15, fill: '#7fbdd0', opacity: 0.55 }, dots);
@@ -45,7 +51,6 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
   el('rect', { width: 6, height: 6, fill: '#ead8ad' }, hatch);
   el('line', { x1: 0, y1: 0, x2: 0, y2: 6, stroke: '#8a7863', 'stroke-width': 1.6 }, hatch);
 
-  const gCam = el('g', { id: 'eu-cam' }, svg);
   const gScene = el('g', { 'clip-path': 'url(#eu-clip)', class: 'eu-scene' }, gCam);
   el('rect', { width: WORLD.w, height: WORLD.h, class: 'eu-sea' }, gScene);
   el('rect', { width: WORLD.w, height: WORLD.h, fill: 'url(#eu-dots)' }, gScene);
@@ -212,22 +217,23 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
   const mView = el('rect', { class: 'mm-view' }, mini);
 
   // ---------- camera ----------
-  let W = 800, H = 600, dirty = true;
+  let W = 800, H = 600, dirty = true, raf = 0, willOn = false, settleT = 0;
+  const wake = () => { clearTimeout(settleT); if (!raf) raf = requestAnimationFrame(tick); };
+  const touch = () => { dirty = true; wake(); };
   const cam = { x: WORLD.w / 2, y: WORLD.h / 2, z: 0.5, tx: WORLD.w / 2, ty: WORLD.h / 2, tz: 0.5 };
   const fitZoom = () => Math.min(W / WORLD.w, H / WORLD.h) * 0.98;
   const clampZ = (z) => Math.min(5, Math.max(fitZoom() * 0.95, z));
-  const snapIfReduced = () => { if (reduced()) Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz }); dirty = true; };
+  const snapIfReduced = () => { if (reduced()) Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz }); touch(); };
   new ResizeObserver(() => {
     W = wrap.clientWidth; H = wrap.clientHeight;
-    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     const atFit = cam.tz <= fitZoom() * 1.02 || !cam.sized;
     cam.sized = true;
-    if (atFit) overview(true); else { cam.tz = clampZ(cam.tz); dirty = true; }
+    if (atFit) overview(true); else { cam.tz = clampZ(cam.tz); touch(); }
   }).observe(wrap);
   function overview(snap) {
     cam.tx = WORLD.w / 2; cam.ty = WORLD.h / 2; cam.tz = fitZoom();
     if (snap) Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz }); else snapIfReduced();
-    dirty = true;
+    touch();
   }
   function frame(points, { pad = 120, maxZ = 1.6 } = {}) {
     const xs = points.map((p) => p[0]), ys = points.map((p) => p[1]);
@@ -253,19 +259,20 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
     snapIfReduced();
   }
   function tick() {
-    if (dirty) {
-      const k = reduced() ? 1 : 0.2;
-      cam.x += (cam.tx - cam.x) * k; cam.y += (cam.ty - cam.y) * k; cam.z += (cam.tz - cam.z) * k;
-      const done = Math.abs(cam.tx - cam.x) < 0.3 && Math.abs(cam.ty - cam.y) < 0.3 && Math.abs(cam.tz - cam.z) < 0.0005;
-      if (done) { Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz }); dirty = false; }
-      gCam.setAttribute('transform', `translate(${f1(W / 2 - cam.x * cam.z)} ${f1(H / 2 - cam.y * cam.z)}) scale(${cam.z.toFixed(4)})`);
-      svg.classList.toggle('z-lo', cam.z < 0.62);
-      mView.setAttribute('x', cam.x - W / 2 / cam.z); mView.setAttribute('y', cam.y - H / 2 / cam.z);
-      mView.setAttribute('width', W / cam.z); mView.setAttribute('height', H / cam.z);
-    }
-    requestAnimationFrame(tick);
+    raf = 0;
+    const k = reduced() ? 1 : 0.2;
+    cam.x += (cam.tx - cam.x) * k; cam.y += (cam.ty - cam.y) * k; cam.z += (cam.tz - cam.z) * k;
+    const done = Math.abs(cam.tx - cam.x) < 0.3 && Math.abs(cam.ty - cam.y) < 0.3 && Math.abs(cam.tz - cam.z) < 0.0005;
+    if (done) Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz });
+    // Promote the layer only while it moves; settled, Chrome re-rasters at the final scale (crisp text and flags).
+    if (!willOn) { layer.style.willChange = 'transform'; willOn = true; }
+    layer.style.transform = `translate(${(W / 2 - cam.x * cam.z).toFixed(2)}px,${(H / 2 - cam.y * cam.z).toFixed(2)}px) scale(${cam.z.toFixed(4)})`;
+    gCam.classList.toggle('z-lo', cam.z < 0.62);
+    mView.setAttribute('x', cam.x - W / 2 / cam.z); mView.setAttribute('y', cam.y - H / 2 / cam.z);
+    mView.setAttribute('width', W / cam.z); mView.setAttribute('height', H / cam.z);
+    if (done) { dirty = false; settleT = setTimeout(() => { layer.style.willChange = ''; willOn = false; }, 150); } else raf = requestAnimationFrame(tick);
   }
-  requestAnimationFrame(tick);
+  wake();
 
   // ---------- pointer input ----------
   const ptrs = new Map();
@@ -288,7 +295,7 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
       pinch0 = d;
     } else if (ptrs.size === 1 && moved > 4) {
       cam.tx -= dx / cam.z; cam.ty -= dy / cam.z;
-      cam.x = cam.tx; cam.y = cam.ty; cam.z = cam.tz; dirty = true;
+      cam.x = cam.tx; cam.y = cam.ty; cam.z = cam.tz; touch();
     }
   });
   const up = (e) => { ptrs.delete(e.pointerId); if (!ptrs.size) pinch0 = 0; };
@@ -333,7 +340,7 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
     if (hlLine === id) return;
     for (const e of byLine[hlLine] ?? []) e.classList.remove('on');
     hlLine = id;
-    svg.classList.toggle('hl', !!id);
+    gCam.classList.toggle('hl', !!id);
     for (const e of byLine[id] ?? []) e.classList.add('on');
   }
   const mark = (c, cls, onOff = true) => {
@@ -369,6 +376,7 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
     overview, frame, zoomBy, centerOn, reveal, highlightLine, mark, clearMarks, setOut, setTabStop, focusStation, neighbour,
     get zoom() { return cam.tz; },
     get fit() { return fitZoom(); },
-    refresh() { dirty = true; },
+    refresh: touch,
+    setScenery(on) { wrap.classList.toggle('map-off', !on); },
   };
 }

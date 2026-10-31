@@ -20,6 +20,16 @@ ctx.map = mapMod.createEuropeMap({ svg: $('#board'), mini: $('#minimap'), wrap: 
 ctx.ui = uiMod.createUi(ctx);
 const { map, ui } = ctx;
 
+// ---------- Map switch (board tools and Options share one saved setting, on by default) ----------
+const applyMap = () => {
+  const on = store.settings.map !== false;
+  map.setScenery(on);
+  $('#board-map').checked = $('#opt-map').checked = on;
+};
+for (const id of ['#board-map', '#opt-map']) $(id).addEventListener('change', (e) => store.set('map', e.target.checked));
+store.onChange(applyMap);
+applyMap();
+
 // ---------- text panel, URL and samples ----------
 let mode = null;
 commonMod.setupText(ctx, { panelMod, urlMod, onInput: (text, info) => modes[mode]?.onText(text, info) });

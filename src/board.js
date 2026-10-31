@@ -1,4 +1,6 @@
 // Board: SVG metro map drawn from chart.json, rubber-hose snake, camera, minimap (SPEC 5).
+// The camera is a CSS transform on an HTML layer holding two world-sized SVGs (static board, snake overlay), so
+// panning and zooming never relayout or repaint the SVG, and the frame loop runs only while something moves.
 const NS = 'http://www.w3.org/2000/svg';
 const CELL = 9.5; // one sub-cell: 4 per station spacing (~38 units)
 const SPEED = CELL / 25; // units per ms: one sub-cell per 25 ms tick
@@ -74,21 +76,27 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
 
   // ---------- DOM ----------
   svg.textContent = '';
-  const defs = el('defs', {}, svg);
+  const layer = document.createElement('div');
+  layer.className = 'cam';
+  layer.style.width = `${size.width}px`; layer.style.height = `${size.height}px`;
+  svg.append(layer);
+  const vb = `0 0 ${size.width} ${size.height}`;
+  const gCam = el('svg', { viewBox: vb }, layer); // static board
+  const over = el('svg', { viewBox: vb, class: 'overlay', 'aria-hidden': 'true' }, layer); // snake only
+  const defs = el('defs', {}, gCam);
   const pat = el('pattern', { id: 'fog-hatch', width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
   el('rect', { width: 6, height: 6, fill: '#ead8ad' }, pat);
   el('line', { x1: 0, y1: 0, x2: 0, y2: 6, stroke: '#8a7863', 'stroke-width': 1.6 }, pat);
-  const dots = el('pattern', { id: 'snake-dots', width: 3.2, height: 3.2, patternUnits: 'userSpaceOnUse' }, defs);
+  const dots = el('pattern', { id: 'snake-dots', width: 3.2, height: 3.2, patternUnits: 'userSpaceOnUse' }, el('defs', {}, over));
   el('circle', { cx: 1.6, cy: 1.6, r: 0.62, fill: '#1c1510', opacity: 0.32 }, dots);
 
-  const gCam = el('g', { id: 'cam' }, svg);
   const gBack = el('g', { class: 'layer-hl' }, gCam);
   const gWob = el('g', { class: 'layer-wobble' }, gCam);
   const gMark = el('g', { class: 'layer-mark' }, gCam);
   const gText = el('g', { class: 'layer-text' }, gCam);
   const gFlags = el('g', { class: 'layer-flags' }, gCam);
   const gLabels = el('g', { class: 'layer-labels' }, gCam);
-  const gSnake = el('g', { class: 'layer-snake' }, gCam);
+  const gSnake = el('g', { class: 'layer-snake' }, over);
   const gBadge = el('g', { class: 'layer-badges' }, gCam);
   const gHit = el('g', { class: 'layer-hit' }, gCam);
 
@@ -198,19 +206,21 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
   const clampZ = (z) => Math.min(6, Math.max(fitZoom() * 0.9, z));
   const ro = new ResizeObserver(() => {
     W = wrap.clientWidth; H = wrap.clientHeight;
-    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     cam.tz = clampZ(cam.tz);
     if (!follow && cam.tz <= fitZoom() * 1.001) overview(true);
-    dirty = true;
+    touch();
   });
-  let dirty = true;
+  let raf = 0, lastT = 0, dirty = true, sdirty = true, willOn = false, ovOn = false, settleT = 0;
+  const wake = () => { clearTimeout(settleT); if (!raf) { lastT = performance.now(); raf = requestAnimationFrame(tick); } };
+  const touch = () => { dirty = true; wake(); };
+  const touchSnake = () => { sdirty = true; wake(); };
   ro.observe(wrap);
 
   function overview(snap) {
     follow = false;
     cam.tx = size.width / 2; cam.ty = size.height / 2; cam.tz = fitZoom();
     if (snap || reduced()) Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz });
-    dirty = true;
+    touch();
   }
   function frame(box, { pad = 40, maxZ = 2.6 } = {}) {
     follow = false;
@@ -218,7 +228,7 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
     cam.tz = Math.min(maxZ, Math.max(fitZoom(), Math.min(W / bw, H / bh)));
     cam.tx = (box.x1 + box.x2) / 2; cam.ty = (box.y1 + box.y2) / 2;
     if (reduced()) Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz });
-    dirty = true;
+    touch();
   }
   function zoomBy(f, px = W / 2, py = H / 2) {
     const nz = clampZ(cam.tz * f);
@@ -227,12 +237,12 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
     if (!follow) { cam.tx = wx - (px - W / 2) / nz; cam.ty = wy - (py - H / 2) / nz; }
     followZoom = nz;
     if (reduced()) Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz });
-    dirty = true;
+    touch();
   }
   function setFollow(on, z) {
     follow = on;
     if (on) { followZoom = clampZ(z ?? Math.max(followZoom, 2.0)); cam.tz = followZoom; }
-    dirty = true;
+    touch();
   }
   const bboxOf = (pts) => ({
     x1: Math.min(...pts.map((p) => p[0])), x2: Math.max(...pts.map((p) => p[0])),
@@ -256,13 +266,13 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
       sn.trail.shift();
     }
   };
-  function setExtra(n) { sn.extra = Math.max(0, n); sn.tlen = (BASE_CELLS + sn.extra) * CELL; if (reduced()) sn.len = sn.tlen; }
+  function setExtra(n) { sn.extra = Math.max(0, n); sn.tlen = (BASE_CELLS + sn.extra) * CELL; if (reduced()) sn.len = sn.tlen; touchSnake(); }
   function teleport(x, y) {
     cancelMove();
     sn.x = x; sn.y = y;
     sn.trail = [{ x, y }]; sn.trailLen = 0;
     if (follow) { cam.tx = x; cam.ty = y; }
-    dirty = true;
+    touch(); touchSnake();
   }
   function cancelMove() { if (mv) { const r = mv.res; mv = null; r(false); } }
 
@@ -274,10 +284,10 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
       for (const p of pts) { sn.x = p.x; sn.y = p.y; pushTrail(true); }
       if (pts.length > 1) { sn.dx = Math.sign(pts.at(-1).x - pts.at(-2).x); sn.dy = sn.dx ? 0 : Math.sign(pts.at(-1).y - pts.at(-2).y); }
       if (follow) { cam.tx = sn.x; cam.ty = sn.y; }
-      dirty = true;
+      touch(); touchSnake();
       return Promise.resolve(true);
     }
-    return new Promise((res) => { mv = { pts, i: 0, res, speed, onPoint }; dirty = true; });
+    return new Promise((res) => { mv = { pts, i: 0, res, speed, onPoint }; wake(); });
   }
   function advance(dist) {
     while (mv && dist > 0) {
@@ -300,7 +310,7 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
     }
   }
   function bump(dir) {
-    sn.bump = 1; sn.bumpDir = DIRS[dir] ?? [sn.dx, sn.dy]; sn.dizzy = 1;
+    sn.bump = 1; sn.bumpDir = DIRS[dir] ?? [sn.dx, sn.dy]; sn.dizzy = 1; touchSnake();
     if (!reduced() && store.settings.shake) {
       wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake');
     }
@@ -313,7 +323,8 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
     wrap.classList.add(`flash-${kind}`);
     setTimeout(() => wrap.classList.remove(`flash-${kind}`), 380);
   }
-
+  // Skip attribute writes whose value did not change (the tongue flips at ~12 fps).
+  const put = (n, k, v) => { if ((n._p ??= {})[k] !== v) { n._p[k] = v; n.setAttribute(k, v); } };
   function drawSnake(now, dt) {
     sn.len += (sn.tlen - sn.len) * Math.min(1, dt / 90);
     if (Math.abs(sn.tlen - sn.len) < 0.05) sn.len = sn.tlen;
@@ -334,36 +345,50 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
     }
     if (pts.length < 2) pts.push([hx - sn.dx * 4, hy - sn.dy * 4]);
     const d = polyD(pts);
-    sOut.setAttribute('d', d); sBody.setAttribute('d', d); sShade.setAttribute('d', d); sScale.setAttribute('d', d);
+    for (const p of [sOut, sBody, sShade, sScale]) put(p, 'd', d);
     const ang = Math.atan2(sn.dy, sn.dx) * 180 / Math.PI;
-    head.setAttribute('transform', `translate(${hx.toFixed(2)} ${hy.toFixed(2)}) rotate(${ang.toFixed(1)})`);
+    put(head, 'transform', `translate(${hx.toFixed(2)} ${hy.toFixed(2)}) rotate(${ang.toFixed(1)})`);
     const sq = reduced() ? 0 : sn.squash;
-    hSq.setAttribute('transform', `scale(${(1 + 0.1 * sq).toFixed(3)} ${(1 - 0.1 * sq).toFixed(3)})`);
+    put(hSq, 'transform', `scale(${(1 + 0.1 * sq).toFixed(3)} ${(1 - 0.1 * sq).toFixed(3)})`);
     head.classList.toggle('dizzy', sn.dizzy > 0);
-    tongue.setAttribute('d', !reduced() && mv && Math.floor(now / 83) % 2 ? 'M8.6 0L14 0M14 0L16.5 -2M14 0L16.5 2' : 'M8.6 0L12 0');
-    mHead.setAttribute('cx', sn.x); mHead.setAttribute('cy', sn.y);
+    put(tongue, 'd', !reduced() && mv && Math.floor(now / 83) % 2 ? 'M8.6 0L14 0M14 0L16.5 -2M14 0L16.5 2' : 'M8.6 0L12 0');
+    put(mHead, 'cx', sn.x); put(mHead, 'cy', sn.y);
   }
 
   // ---------- frame loop ----------
-  let last = performance.now();
+  const snakeBusy = () => mv || sn.len !== sn.tlen || sn.squash > 0 || sn.bump > 0 || sn.dizzy > 0;
+  const atTarget = () => cam.x === cam.tx && cam.y === cam.ty && cam.z === cam.tz;
+  const promote = (on) => { // own compositor layers only while moving; settled, Chrome re-rasters at the final scale
+    if (on !== willOn) { layer.style.willChange = on ? 'transform' : ''; willOn = on; }
+    const ov = on || !!snakeBusy();
+    if (ov !== ovOn) { over.style.willChange = ov ? 'transform' : ''; ovOn = ov; }
+  };
   function tick(now) {
-    const dt = Math.min(now - last, 50);
-    last = now;
+    raf = 0;
+    const dt = Math.min(Math.max(now - lastT, 0), 50);
+    lastT = now;
+    const drawS = sdirty || !!snakeBusy();
     if (mv) advance(SPEED * mv.speed * dt);
     if (follow) { cam.tx = sn.x; cam.ty = sn.y; cam.tz = followZoom; }
-    const k = reduced() ? 1 : Math.min(1, dt / (follow ? 110 : 150));
-    const nx = cam.x + (cam.tx - cam.x) * k, ny = cam.y + (cam.ty - cam.y) * k, nz = cam.z + (cam.tz - cam.z) * k;
-    if (Math.abs(nx - cam.x) + Math.abs(ny - cam.y) + Math.abs(nz - cam.z) > 0.001 || dirty) {
-      cam.x = nx; cam.y = ny; cam.z = nz;
-      gCam.setAttribute('transform', `translate(${(W / 2 - cam.x * cam.z).toFixed(2)} ${(H / 2 - cam.y * cam.z).toFixed(2)}) scale(${cam.z.toFixed(4)})`);
-      mView.setAttribute('x', cam.x - W / (2 * cam.z)); mView.setAttribute('y', cam.y - H / (2 * cam.z));
-      mView.setAttribute('width', W / cam.z); mView.setAttribute('height', H / cam.z);
+    if (!atTarget()) {
+      const k = reduced() ? 1 : Math.min(1, dt / (follow ? 110 : 150));
+      const px = (Math.abs(cam.tx - cam.x) + Math.abs(cam.ty - cam.y)) * cam.z + Math.abs(cam.tz - cam.z) * Math.max(W, H) / 2;
+      if (k === 1 || px < 0.5) Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz });
+      else { cam.x += (cam.tx - cam.x) * k; cam.y += (cam.ty - cam.y) * k; cam.z += (cam.tz - cam.z) * k; }
+      dirty = true;
+    }
+    if (dirty) {
+      promote(true);
+      layer.style.transform = `translate(${(W / 2 - cam.x * cam.z).toFixed(2)}px,${(H / 2 - cam.y * cam.z).toFixed(2)}px) scale(${cam.z.toFixed(4)})`;
+      put(mView, 'x', cam.x - W / (2 * cam.z)); put(mView, 'y', cam.y - H / (2 * cam.z));
+      put(mView, 'width', W / cam.z); put(mView, 'height', H / cam.z);
       dirty = false;
     }
-    drawSnake(now, dt);
-    requestAnimationFrame(tick);
+    if (drawS) { if (!ovOn) promote(willOn); drawSnake(now, dt); sdirty = false; }
+    if (!atTarget() || snakeBusy() || dirty || sdirty) raf = requestAnimationFrame(tick);
+    else settleT = setTimeout(() => promote(false), 150);
   }
-  requestAnimationFrame(tick);
+  wake();
 
   // ---------- marks ----------
   const cls = (e, c, v) => e.classList.toggle(c, !!v);
@@ -484,7 +509,7 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
     } else if (ptrs.size === 1 && panMode) {
       follow = false;
       cam.tx -= dx / cam.z; cam.ty -= dy / cam.z;
-      cam.x = cam.tx; cam.y = cam.ty; dirty = true;
+      cam.x = cam.tx; cam.y = cam.ty; touch();
     }
   });
   const up = (e) => {
@@ -533,6 +558,6 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
     setPanMode(v) { panMode = v; },
     showRoute, clearRoute, focusStep, here, strike, clearMarks, block, setFog, mark, setTabbable, setDim,
     toScreen, headScreen: () => toScreen(sn.x, sn.y),
-    refresh() { dirty = true; },
+    refresh: touch,
   };
 }

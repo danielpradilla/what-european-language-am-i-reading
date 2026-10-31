@@ -28,12 +28,17 @@ body { overflow-x: clip; }
 .board-panel, .side { height: clamp(540px, calc(100dvh - 235px), 880px); display: flex; flex-direction: column; padding: 12px; min-width: 0; }
 .hud { margin-bottom: 10px; gap: 8px 12px; }
 .hud .meter { min-width: 190px; flex: 1; grid-template-columns: auto minmax(60px, 1fr) auto; }
-.board-wrap { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--paper); border: var(--line-heavy) solid var(--ink); border-radius: var(--cut); }
-#board { display: block; width: 100%; height: 100%; touch-action: none; user-select: none; -webkit-user-select: none; }
+.board-wrap { position: relative; flex: 1; min-height: 0; overflow: hidden; isolation: isolate; contain: layout paint; background: var(--paper); border: var(--line-heavy) solid var(--ink); border-radius: var(--cut); }
+#board { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; contain: strict; touch-action: none; user-select: none; -webkit-user-select: none; }
 #board:focus-visible { outline-offset: -8px; }
+/* camera: one HTML layer moved by a CSS transform; the SVGs inside never relayout */
+.cam { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.cam > svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+.cam > svg { text-rendering: geometricPrecision; } /* glyphs scale with the CSS transform instead of re-laying out every text on each zoom frame */
+.cam > .overlay { pointer-events: none; }
 .board-tools { position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; }
 .board-tools .btn { min-width: 44px; min-height: 44px; padding: 0 10px; }
-#minimap { position: absolute; left: 8px; bottom: 8px; width: 132px; height: auto; aspect-ratio: 1024 / 724; background: var(--card); border: var(--line) solid var(--ink); box-shadow: 3px 3px 0 var(--ink); pointer-events: none; }
+#minimap { position: absolute; left: 8px; bottom: 8px; width: 132px; height: auto; aspect-ratio: 1024 / 724; background: var(--card); border: var(--line) solid var(--ink); box-shadow: 3px 3px 0 var(--ink); pointer-events: none; contain: layout paint; }
 .mm-edge { fill: none; stroke-width: 7; }
 .mm-edge.y { stroke: var(--sky); }
 .mm-edge.n { stroke: var(--line-no); }
@@ -359,3 +364,9 @@ button.lg-main:hover, button.lg-main:focus-visible { background: var(--paper-dee
   .eu #minimap { width: 84px; }
   .line-intro { width: calc(100% - 16px); font-size: 0.82rem; }
 }
+
+/* Europe "Map" switch: off hides the coast scenery, leaving lines and stations on plain paper */
+.board-map { align-self: stretch; padding: 0 12px; color: var(--ink); background: var(--card); border: var(--line) solid var(--ink); border-radius: var(--cut); box-shadow: 3px 3px 0 var(--ink); font: 700 0.9rem var(--font-ui); }
+.map-off .eu-scene { display: none; }
+.map-off #minimap .mm-land { display: none; }
+.map-off #minimap .mm-sea { fill: var(--card); }
