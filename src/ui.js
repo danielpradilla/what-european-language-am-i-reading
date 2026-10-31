@@ -56,7 +56,8 @@ export function createUi(ctx) {
     dsb: 'The metro map swapped the two Sorbian flags: <code>ů</code> N leads here. Real Lower Sorbian text (<code>č</code>, <code>ě</code>, no <code>ř</code>) ends at Upper Sorbian. The app keeps the map’s routing.',
     rmy: 'Two stations lead to this flag, so there are two routes.',
   };
-  function showCard(code) {
+  /** extra: html shown under the heading (the Europe map adds line, branch and a poster link). */
+  function showCard(code, extra = '') {
     const lf = leafInfo(code);
     const paths = engine.pathsTo(code);
     const sample = samples.find((s) => s.lang === code);
@@ -78,6 +79,7 @@ export function createUi(ctx) {
           <p class="muted">${esc(lf.english)} · <span class="num">${esc(code)}</span> · flag of ${esc(lf.flagNote)}</p>
         </div>
       </div>
+      ${extra}
       ${routeHtml}
       ${NOTES[code] ? `<div class="note note-warning"><strong>Chart quirk</strong><span>${NOTES[code]}</span></div>` : ''}
       <div class="card-min">

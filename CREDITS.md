@@ -208,6 +208,11 @@ Flag images are SVG files from Wikimedia Commons, stored in `assets/flags/`. The
 | `veps.svg` | `vep` | [Flag of Vepsia](https://commons.wikimedia.org/wiki/File:Flag_of_Vepsia.svg) | User:.... | Public domain |
 | `wales.svg` | `cym` | [Flag of Wales](https://commons.wikimedia.org/wiki/File:Flag_of_Wales.svg) | Unknown Vector graphics by Tobias Jakobs | Public domain |
 
+## Europe map
+
+- Language coordinates and the language families behind the line colours: [Glottolog](https://glottolog.org) 5 (Hammarström, Forkel, Haspelmath & Bank), licensed CC BY 4.0. Station positions on `europe.html` are schematised by hand from these coordinates.
+- Coastline scenery behind the lines: [Natural Earth](https://www.naturalearthdata.com/) 50m land and lakes, public domain, simplified and warped so the seas fall between the schematic stations.
+
 ## Fonts
 
 Loaded from Google Fonts, all under the SIL Open Font License 1.1: Sansita and Sansita Swashed (Pablo Cosgaya, Omnibus-Type), Recursive (Arrow Type), and Noto Sans, Noto Sans Armenian, Noto Sans Georgian and Noto Sans Hebrew (Google).

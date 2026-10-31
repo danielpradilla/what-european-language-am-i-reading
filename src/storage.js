@@ -8,7 +8,7 @@ const write = (key, value) => {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* storage unavailable: keep playing */ }
 };
 
-export function createStore() {
+export function createStore(scoresKey = K.hi) {
   let collection = read(K.coll, {});
   const settings = {
     sound: true,
@@ -16,7 +16,7 @@ export function createStore() {
     shake: true,
     ...read(K.set, {}),
   };
-  let scores = read(K.hi, []);
+  let scores = read(scoresKey, []);
   const listeners = new Set();
   const emit = () => listeners.forEach((f) => f());
 
@@ -42,7 +42,7 @@ export function createStore() {
     /** Insert a score and return its rank index in the top 10 (or -1). */
     addScore(entry) {
       scores = [...scores, entry].sort((a, b) => b.score - a.score).slice(0, 10);
-      write(K.hi, scores);
+      write(scoresKey, scores);
       return scores.indexOf(entry);
     },
   };

@@ -500,7 +500,7 @@ The poster sorts languages by letters. This page draws the same 106 languages as
 
 - Explore: tap or focus a station to open the same language card as on the poster (section 7.1), with its line and branch added, and a link that opens the poster page at that language. Arrow keys move between neighbouring stations along the lines.
 - Detect: the same text panel as the poster page. When a text is routed, the map replays the chart's route step by step: at each letter station of the poster, the languages it rules out fade on the Europe map, with a counter ("Has č? No. 72 languages left"). The destination station lights up at the end. This shows that the letter chart cuts across families and geography.
-- Guess the station (game): the app shows a sample text, and the player taps the station where it is spoken. An exact answer scores 100 points; a station on the same line or branch scores 40 and shows "Right family"; anything else scores 0. Each answer then shows the chart's route for that text and the correct station. Ten rounds per game, with hearts, score and a local top-10 table, using the same game UI components as Arcade.
+- Guess the station (game): the app shows a sample text, and the player taps the station where it is spoken. An exact answer scores 100 points; a station on the same line or branch scores 40 and shows "Right family"; anything else scores 0. Each answer then shows the chart's route for that text and the correct station. Ten rounds per game, with round counter, score, streak of exact answers and a local top-10 table (its own storage key, separate from Arcade), using the same game UI components as Arcade. There are no hearts: every round is played.
 
 ### 16.4 Style and page
 
