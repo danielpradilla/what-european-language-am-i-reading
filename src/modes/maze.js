@@ -81,7 +81,7 @@ export function createMaze(ctx) {
     busy = true;
     const { via } = cur();
     audio.tick();
-    const ok = await board.moveAlong([...via.points].reverse());
+    const ok = await board.moveAlong([...via.points].reverse(), { shrink: true });
     busy = false;
     if (!ok || !active) return;
     stack.pop();

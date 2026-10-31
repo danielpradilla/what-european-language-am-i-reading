@@ -12,6 +12,7 @@ export function createDetect(ctx) {
   let token = 0;
   let focusIdx = -1;
   let newTimer = 0;
+  let provisional = false, confirmTimer = 0; // see waitConfirm()
   const lc = (text, off) => lineCol(text, off);
   const where = (text, off) => { const p = lc(text, off); return `line ${p.line}, col ${p.col}`; };
 
@@ -35,7 +36,9 @@ export function createDetect(ctx) {
       list.append(li);
     });
     const lf = chart.leaves[route.leaf];
-    title.innerHTML = `<span class="found-line">${ui.flagHtml(route.leaf)}<span>Ends at <b>${ui.esc(lf.english)}</b> <span class="muted">· ${ui.esc(lf.label)}</span></span><button type="button" class="btn btn-small" data-card>Card</button></span>`;
+    title.innerHTML = provisional
+      ? `<span class="found-line">${ui.flagHtml(route.leaf)}<span>Heading to <b>${ui.esc(lf.english)}</b> <span class="muted">· keep typing</span></span><button type="button" class="btn btn-small btn-primary" data-finish>Finish</button></span>`
+      : `<span class="found-line">${ui.flagHtml(route.leaf)}<span>Ends at <b>${ui.esc(lf.english)}</b> <span class="muted">· ${ui.esc(lf.label)}</span></span><button type="button" class="btn btn-small" data-card>Card</button></span>`;
   }
 
   function paintText() {
@@ -62,7 +65,8 @@ export function createDetect(ctx) {
     board.here(null);
     board.showRoute(steps, null, from); // the trail so far stays lit; the rest lights up as the snake passes
     board.setExtra(board.growthFor(steps.slice(0, from)));
-    board.teleport(...board.nodePos(steps[Math.min(from, steps.length - 1)].station));
+    const before = steps.slice(0, from).flatMap((s) => board.graph.edges[`${s.station}|${s.answer ? 'y' : 'n'}`].points);
+    board.teleport(...board.nodePos(steps[Math.min(from, steps.length - 1)].station), before);
     for (let i = from; i < steps.length; i++) {
       const e = board.graph.edges[`${steps[i].station}|${steps[i].answer ? 'y' : 'n'}`];
       board.lightStep(steps[i], i);
@@ -71,7 +75,7 @@ export function createDetect(ctx) {
       if (!(await board.moveAlong(e.points, { speed })) || my !== token) return;
     }
     board.here(null);
-    if (my === token) arrived();
+    if (my === token) (provisional ? waitConfirm() : arrived());
   }
   function arrived() {
     const code = route.leaf;
@@ -83,6 +87,29 @@ export function createDetect(ctx) {
     ui.announce(`Route ends at ${chart.leaves[code].english}, ${chart.leaves[code].label}.`);
   }
 
+  // While the player types, the route is only provisional: no "Found!" until they pause with enough text to be fair.
+  const MIN_LETTERS = 30, PAUSE_MS = 2000;
+  const letters = (t) => (t.match(/\p{L}/gu) ?? []).length;
+  function waitConfirm() {
+    clearTimeout(confirmTimer);
+    confirmTimer = setTimeout(() => {
+      if (!active || !route?.leaf || !provisional) return;
+      const n = letters(panel.text());
+      if (n < MIN_LETTERS) {
+        ui.notice('typing', 'info', 'Keep typing', `So far the snake is heading to ${chart.leaves[route.leaf].english}. Short texts take odd routes, so the chart needs at least ${MIN_LETTERS} letters to be fair: ${n} so far. Press Finish to stop here.`);
+        return;
+      }
+      confirm();
+    }, PAUSE_MS);
+  }
+  function confirm() {
+    clearTimeout(confirmTimer);
+    provisional = false;
+    ui.clearNotice('typing');
+    renderList();
+    if (!board.moving) arrived(); // otherwise play() calls arrived() when the snake gets there
+  }
+
   /** Called whenever the text changes. */
   function onText(text, info = {}) {
     if (!active) return;
@@ -90,6 +117,8 @@ export function createDetect(ctx) {
     ctx.urlRowUpdate?.(text);
     if (ctx.isUrl(text)) { route = null; prevSteps = null; board.clearRoute(); renderList(); paintText(); ui.notice('empty', 'info', 'That looks like a web address', 'Press Enter or the button to fetch its text.'); return; }
     ui.clearNotice('empty');
+    clearTimeout(confirmTimer);
+    const typing = !!info.user && !/^insertFrom(Paste|Drop)/.test(info.inputType ?? '');
     route = engine.route(text);
     ui.clearNotice('scripts');
     if (!route.leaf) {
@@ -101,15 +130,17 @@ export function createDetect(ctx) {
       return;
     }
     if (!route.european) ui.notice('scripts', 'warning', 'This chart only covers European alphabets.', 'The route below is where the chart sends it anyway.');
-    renderList(); paintText(); focusStep(-1); runWhy();
-    const box = board.bboxOf([board.nodePos(chart.root), ...route.steps.flatMap((s) => board.graph.edges[`${s.station}|${s.answer ? 'y' : 'n'}`].points), board.nodePos(`L:${route.leaf}`)]);
-    board.frame(box, { pad: 60, maxZ: 2.4 });
     // first changed step: the snake reruns from there
     let k = 0;
     if (prev) while (k < prev.length && k < route.steps.length && prev[k].station === route.steps[k].station && prev[k].answer === route.steps[k].answer) k++;
     const same = prev && k === prev.length && k === route.steps.length;
+    provisional = same ? provisional && typing : typing; // a confirmed route stays confirmed while it does not change
+    ui.clearNotice('typing'); // a pause brings it back with the current count
+    renderList(); paintText(); focusStep(-1); runWhy();
+    const box = board.bboxOf([board.nodePos(chart.root), ...route.steps.flatMap((s) => board.graph.edges[`${s.station}|${s.answer ? 'y' : 'n'}`].points), board.nodePos(`L:${route.leaf}`)]);
+    board.frame(box, { pad: 60, maxZ: 2.4 });
     prevSteps = route.steps.map((s) => ({ station: s.station, answer: s.answer }));
-    if (same) { board.here(null); return; }
+    if (same) { board.here(null); if (provisional && !board.moving) waitConfirm(); return; }
     if (info.user && prev) liveNote(text, info.prev ?? '', k);
     play(info.user && prev ? Math.min(k, route.steps.length - 1) : 0, info.user ? 5 : 4);
   }
@@ -165,7 +196,11 @@ export function createDetect(ctx) {
   list.addEventListener('focusin', (e) => { const b = e.target.closest('.step'); if (b) focusStep(Number(b.dataset.i)); });
   list.addEventListener('pointerleave', () => focusStep(-1));
   list.addEventListener('focusout', (e) => { if (!list.contains(e.relatedTarget)) focusStep(-1); });
-  title.addEventListener('click', (e) => { if (e.target.closest('[data-card]') && route?.leaf) ui.showCard(route.leaf); });
+  title.addEventListener('click', (e) => {
+    if (!route?.leaf) return;
+    if (e.target.closest('[data-card]')) ui.showCard(route.leaf);
+    else if (e.target.closest('[data-finish]')) confirm();
+  });
 
   function onHover(id) {
     if (!active || !route?.leaf) return;
@@ -190,12 +225,13 @@ export function createDetect(ctx) {
     exit() {
       active = false; token++;
       board.cancelMove(); board.clearRoute(); board.setExtra(0); panel.clearAll(); focusStep(-1);
-      ui.clearNotice('scripts'); ui.clearNotice('live'); ui.clearNotice('empty');
+      ui.clearNotice('scripts'); ui.clearNotice('live'); ui.clearNotice('empty'); ui.clearNotice('typing');
+      clearTimeout(confirmTimer); provisional = false;
       prevSteps = null;
     },
     onText,
     key(e) {
-      if (e.key === 'Enter' && route?.leaf) { play(0, 4); return true; }
+      if (e.key === 'Enter' && route?.leaf) { if (provisional) confirm(); else play(0, 4); return true; }
       return false;
     },
     rerun() { prevSteps = null; if (route?.leaf) play(0, 4); },

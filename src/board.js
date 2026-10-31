@@ -8,9 +8,10 @@ const BASE_CELLS = 5;
 const DIRS = { l: [-1, 0], r: [1, 0], u: [0, -1], d: [0, 1] };
 export const DIR_WORD = { l: 'left', r: 'right', u: 'up', d: 'down' };
 const OPP = { l: 'r', r: 'l', u: 'd', d: 'u' };
-// Snake-game growth, the same in every mode: 2 segments per station passed, 4 at a Y station (letters eaten).
-const MAX_EXTRA = 60;
-const stepGrowth = (answer) => (answer ? 4 : 2);
+// Snake-game growth, the same in every mode: the snake keeps growing as it moves (its tail stays put),
+// plus two segments for the letters it eats at a Y station.
+const MAX_EXTRA = 400;
+const stepGrowth = (answer) => (answer ? 2 : 0);
 
 const el = (tag, attrs = {}, parent) => {
   const e = document.createElementNS(NS, tag);
@@ -255,7 +256,8 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
   });
 
   // ---------- snake ----------
-  const sn = { x: stations[chart.root].at[0], y: stations[chart.root].at[1], dx: -1, dy: 0, trail: [], trailLen: 0, len: BASE_CELLS * CELL, tlen: BASE_CELLS * CELL, extra: 0, squash: 0, bump: 0, bumpDir: [0, 0], dizzy: 0 };
+  // travel: distance moved since the last setExtra; the snake's tail stays put while it moves, so it keeps growing.
+  const sn = { x: stations[chart.root].at[0], y: stations[chart.root].at[1], dx: -1, dy: 0, trail: [], trailLen: 0, len: BASE_CELLS * CELL, tlen: BASE_CELLS * CELL, extra: 0, travel: 0, squash: 0, bump: 0, bumpDir: [0, 0], dizzy: 0 };
   sn.trail.push({ x: sn.x, y: sn.y });
   let mv = null;
 
@@ -271,32 +273,54 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
       sn.trail.shift();
     }
   };
-  function setExtra(n) { sn.extra = Math.min(Math.max(0, n), MAX_EXTRA); sn.tlen = (BASE_CELLS + sn.extra) * CELL; if (reduced()) sn.len = sn.tlen; touchSnake(); }
-  /** Grow for one station passed with this answer. */
-  const grow = (answer) => setExtra(sn.extra + stepGrowth(answer));
-  /** Length after travelling these steps from the start. */
-  const growthFor = (steps) => steps.reduce((a, s) => a + stepGrowth(s.answer), 0);
-  function teleport(x, y) {
+  /** Going back over its own body: drop the trail the head has retraced instead of adding to it. */
+  const retract = () => {
+    const t = sn.trail;
+    while (t.length > 1) {
+      const p = t[t.length - 1], q = t[t.length - 2];
+      if ((p.x - sn.x) * (q.x - p.x) + (p.y - sn.y) * (q.y - p.y) >= -1e-6 && Math.hypot(p.x - sn.x, p.y - sn.y) > 0.01) break;
+      sn.trailLen -= Math.hypot(p.x - q.x, p.y - q.y); t.pop();
+    }
+    t.push({ x: sn.x, y: sn.y });
+  };
+  const lenFor = () => (BASE_CELLS + sn.extra) * CELL + sn.travel;
+  function setExtra(n) { sn.extra = Math.min(Math.max(0, n), MAX_EXTRA); sn.travel = 0; sn.tlen = lenFor(); if (reduced()) sn.len = sn.tlen; touchSnake(); }
+  /** Moving lengthens the snake by the distance covered (shrink: going back shortens it). */
+  function travelled(d, shrink) {
+    const t = Math.max(-sn.extra * CELL, sn.travel + (shrink ? -d : d));
+    const delta = t - sn.travel;
+    if (sn.extra * CELL + t > MAX_EXTRA * CELL) return;
+    sn.travel = t; sn.tlen += delta; sn.len += delta;
+  }
+  /** Fold the distance moved into the length and add the bonus for one station (letters eaten at a Y). */
+  const grow = (answer) => setExtra(sn.extra + sn.travel / CELL + stepGrowth(answer));
+  // s: a route step { station, answer } or an edge record (which carries its points)
+  const edgeLen = (s) => (s.points ?? graph.edges[edgeId(s.station, s.answer)].points).reduce((a, p, i, ps) => (i ? a + Math.hypot(p[0] - ps[i - 1][0], p[1] - ps[i - 1][1]) : 0), 0);
+  /** Extra length (cells) after travelling these steps from the start: the path covered plus the Y bonuses. */
+  const growthFor = (steps) => steps.reduce((a, s) => a + edgeLen(s) / CELL + stepGrowth(s.answer), 0);
+  /** Jump the head to (x, y). trail: optional points already travelled (oldest first), so a long snake keeps its body. */
+  function teleport(x, y, trail = null) {
     cancelMove();
     sn.x = x; sn.y = y;
-    sn.trail = [{ x, y }]; sn.trailLen = 0;
+    sn.trail = trail?.length ? [...trail.map((p) => ({ x: p[0], y: p[1] })), { x, y }] : [{ x, y }];
+    sn.trailLen = sn.trail.reduce((a, p, i, t) => (i ? a + Math.hypot(p.x - t[i - 1].x, p.y - t[i - 1].y) : 0), 0);
     if (follow) { cam.tx = x; cam.ty = y; }
     touch(); touchSnake();
   }
   function cancelMove() { if (mv) { const r = mv.res; mv = null; r(false); } }
 
   /** Move the head through points (board units). Resolves true when it arrives, false if cancelled. */
-  function moveAlong(points, { speed = 1, onPoint } = {}) {
+  function moveAlong(points, { speed = 1, onPoint, shrink = false } = {}) {
     cancelMove();
     const pts = points.map((p) => ({ x: p[0], y: p[1] }));
     if (reduced()) {
-      for (const p of pts) { sn.x = p.x; sn.y = p.y; pushTrail(true); }
+      for (const p of pts) { travelled(Math.hypot(p.x - sn.x, p.y - sn.y), shrink); sn.x = p.x; sn.y = p.y; shrink ? retract() : pushTrail(true); }
       if (pts.length > 1) { sn.dx = Math.sign(pts.at(-1).x - pts.at(-2).x); sn.dy = sn.dx ? 0 : Math.sign(pts.at(-1).y - pts.at(-2).y); }
       if (follow) { cam.tx = sn.x; cam.ty = sn.y; }
       touch(); touchSnake();
       return Promise.resolve(true);
     }
-    return new Promise((res) => { mv = { pts, i: 0, res, speed, onPoint }; wake(); });
+    return new Promise((res) => { mv = { pts, i: 0, res, speed, onPoint, shrink }; wake(); });
   }
   function advance(dist) {
     while (mv && dist > 0) {
@@ -309,12 +333,12 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
         sn.dx = ndx; sn.dy = ndy;
       }
       if (d <= dist) {
-        sn.x = t.x; sn.y = t.y; dist -= d; pushTrail(true);
+        travelled(d, mv.shrink); sn.x = t.x; sn.y = t.y; dist -= d; mv.shrink ? retract() : pushTrail(true);
         mv.onPoint?.(mv.i);
         mv.i++;
         if (mv.i >= mv.pts.length) { const r = mv.res; mv = null; r(true); }
       } else {
-        sn.x += (dx / d) * dist; sn.y += (dy / d) * dist; dist = 0; pushTrail(false);
+        travelled(dist, mv.shrink); sn.x += (dx / d) * dist; sn.y += (dy / d) * dist; dist = 0; mv.shrink ? retract() : pushTrail(false);
       }
     }
   }
@@ -561,7 +585,7 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
     on, graph, stationEls: stEls,
     nodePos, bboxOf,
     overview, frame, zoomBy, setFollow, teleport, moveAlong, cancelMove, setExtra, bump, flash,
-    get extra() { return sn.extra; },
+    get extra() { return sn.extra + sn.travel / CELL; },
     get head() { return { x: sn.x, y: sn.y }; },
     get moving() { return !!mv; },
     get zoom() { return cam.tz; },
