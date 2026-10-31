@@ -402,7 +402,8 @@ The app is published at `https://www.danielpradilla.info/projects/what-european-
 - PHP 8.2 is available there, so `api/fetch.php` runs on the same origin and no extra service is needed.
 - All asset and API paths in the app are relative, so it works under `/projects/what-european-language-am-i-reading/`. The two site-bar links (`/projects/` and `/blog/`) are root-relative.
 - When a file under `src/`, `styles.css`, `game-style.css` or `data/` changes, bump the `?v=` query parameter where `index.html` loads it (`src/main.js` imports the other modules with the same parameter); earlier projects on this host served cached old assets after a deploy.
-- Deploy with the DreamHost rsync script, without `--delete`. Only `index.html`, `game-style.css`, `styles.css`, `src/`, `api/`, `assets/`, `data/` and `CREDITS.md` are uploaded; `tests/` and `SPEC.md` stay local. Directories are mode `755` and files `644`.
+- Cloudflare sits in front of the site and caches static files for 31 days, including 404s and half-uploaded files. Never request the site while rsync is still running. If a file under the current `?v=` was fetched too early, bump the token in both HTML pages and redeploy them; the API token available here cannot purge the cache. This happened twice on the first deploy.
+- Deploy with the DreamHost rsync script, without `--delete`. Only `index.html`, `europe.html`, `game-style.css`, `styles.css`, `src/`, `api/`, `assets/`, `data/` and `CREDITS.md` are uploaded; `tests/` and `SPEC.md` stay local. Directories are mode `755` and files `644`.
 - After each deploy, check the page, a URL fetch, and `~/logs/danielpradilla.info/https/error.log`.
 
 ### 12.3 Projects catalog
