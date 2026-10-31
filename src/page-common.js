@@ -17,7 +17,8 @@ export async function loadAspects(flags) {
 
 /**
  * Creates ctx.panel and wires the text box, URL fetch, sample and clear buttons.
- * Adds ctx.setMeta({ text, html }) (source line under the text) and ctx.loadRandomSample().
+ * Adds ctx.setMeta({ text, html }) (source line under the text), ctx.loadRandomSample(auto) and ctx.autoSampleText
+ * (the text of a sample a mode loaded on its own, so Detect can tell it from text the player chose).
  * onInput(text, info) is called after the shared bookkeeping.
  */
 export function setupText(ctx, { panelMod, urlMod, onInput }) {
@@ -42,11 +43,14 @@ export function setupText(ctx, { panelMod, urlMod, onInput }) {
   const sampleMeta = (s) => ({ text: s.text, html: `Sample: <a href="${ui.esc(s.source)}" target="_blank" rel="noopener">${ui.esc(s.title || s.source)}</a> · ${ui.esc(s.license)}` });
   ctx.sampleMeta = sampleMeta;
   let lastSample = -1;
-  ctx.loadRandomSample = () => {
+  ctx.autoSampleText = null;
+  /** auto: loaded by a mode on entry rather than by the player. */
+  ctx.loadRandomSample = (auto = false) => {
     let i;
     do { i = Math.floor(Math.random() * samples.length); } while (i === lastSample && samples.length > 1);
     lastSample = i;
     meta = sampleMeta(samples[i]);
+    ctx.autoSampleText = auto ? samples[i].text : null;
     panel.setText(samples[i].text);
   };
 

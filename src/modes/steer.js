@@ -1,6 +1,7 @@
 // Steer: the player finds the route for a text by moving the snake. Arcade reuses it through `arcade` hooks (SPEC 6.3).
 const $ = (s) => document.querySelector(s);
 const DIR_WORD = { l: 'left', r: 'right', u: 'up', d: 'down' };
+const ARROW = { l: '←', r: '→', u: '↑', d: '↓' };
 const KEYDIR = { ArrowLeft: 'l', ArrowRight: 'r', ArrowUp: 'u', ArrowDown: 'd', a: 'l', d: 'r', w: 'u', s: 'd' };
 
 export function createSteer(ctx) {
@@ -31,6 +32,12 @@ export function createSteer(ctx) {
     const o = board.graph.out[s.station];
     board.here(s.station);
     board.setTabbable(new Set([s.station, o.y.to, o.n.to].filter((k) => !k.startsWith('L:'))));
+    // The on-screen Y and N buttons show which way each line leaves this station.
+    for (const [act, dir] of [['y', o.y.dir], ['n', o.n.dir]]) {
+      const b = $(`#pad [data-act="${act}"]`);
+      if (b) { b.innerHTML = `${act.toUpperCase()}<span class="dir" aria-hidden="true">${ARROW[dir]}</span>`; b.setAttribute('aria-label', `${act === 'y' ? 'Yes' : 'No'}, go ${DIR_WORD[dir]}`); }
+    }
+    $('#pad-q').innerHTML = `<span>Has <b>${E(seqText(s.station))}</b>?</span>`; // the snake's head covers the station, so the question sits on the pad too
     say(`Does the text contain <b class="seq-inline">${E(seqText(s.station))}</b>? <span class="muted">Y goes ${DIR_WORD[o.y.dir]}, N goes ${DIR_WORD[o.n.dir]}.</span>`);
     ui.announce(`Station ${seqText(s.station)}. Does the text contain ${seqText(s.station)}? Y goes ${DIR_WORD[o.y.dir]}, N goes ${DIR_WORD[o.n.dir]}.`);
     r.busy = false;
@@ -169,6 +176,7 @@ export function createSteer(ctx) {
 
   function finish() {
     r.done = true; r.busy = true;
+    $('#pad-q').textContent = '';
     const code = r.route.leaf, lf = chart.leaves[code];
     const secs = Math.round((performance.now() - r.t0) / 100) / 10;
     board.here(null);
@@ -228,7 +236,7 @@ export function createSteer(ctx) {
       btnHint.hidden = false;
       if (!arc) {
         panel.setEditable(true);
-        if (!panel.text().trim() || ctx.isUrl(panel.text())) ctx.loadRandomSample(); else start(panel.text());
+        if (!panel.text().trim() || ctx.isUrl(panel.text())) ctx.loadRandomSample(true); else start(panel.text());
       }
     },
     exit() {
@@ -236,6 +244,8 @@ export function createSteer(ctx) {
       board.cancelMove(); board.clearRoute(); board.clearMarks(); board.setExtra(0); board.here(null);
       panel.clearAll(); ui.clearNotice('steer'); ui.clearNotice('scripts'); ui.clearNotice('empty');
       r = null;
+      for (const act of ['y', 'n']) { const b = $(`#pad [data-act="${act}"]`); if (b) { b.textContent = act.toUpperCase(); b.removeAttribute('aria-label'); } }
+      $('#pad-q').textContent = '';
     },
     onText(text) { if (active && !arc) start(text); },
     key(e) {

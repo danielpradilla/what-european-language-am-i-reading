@@ -48,9 +48,18 @@ body { overflow-x: clip; }
 .pad { display: none; position: absolute; right: 10px; bottom: 12px; gap: 10px; }
 .pad .btn { min-width: 60px; min-height: 60px; font-size: 1.4rem; }
 .pad .btn-small { font-size: 1rem; min-width: 56px; }
+/* Steer and Arcade need their Y/N buttons everywhere; Maze has buttons in its panel, so its pad is for touch only. */
+[data-mode="steer"] .pad, [data-mode="arcade"] .pad { display: flex; }
+[data-mode="steer"] .pad [data-act="back"], [data-mode="arcade"] .pad [data-act="back"] { display: none; }
+.pad .btn .dir { margin-left: 4px; font-size: 0.8em; }
+.pad { flex-wrap: wrap; justify-content: flex-end; align-items: flex-end; max-width: calc(100% - 20px); }
+.pad-q { display: none; flex-basis: 100%; margin: 0; text-align: right; }
+.pad-q:not(:empty) { display: block; }
+.pad-q span { display: inline-block; padding: 3px 10px; font: 700 0.95rem/1.3 var(--font-ui); color: var(--ink); background: var(--card); border: var(--line) solid var(--ink); border-radius: var(--cut); box-shadow: 2px 2px 0 var(--ink); }
+.pad-q b { font: 700 1.2rem/1 var(--noto); }
+[data-mode="maze"] .pad-q { display: none; }
 @media (pointer: coarse), (max-width: 899px) {
-  [data-mode="maze"] .pad, [data-mode="steer"] .pad, [data-mode="arcade"] .pad { display: flex; }
-  [data-mode="steer"] .pad [data-act="back"], [data-mode="arcade"] .pad [data-act="back"] { display: none; }
+  [data-mode="maze"] .pad { display: flex; }
 }
 
 /* ---------- board drawing ---------- */

@@ -95,6 +95,7 @@ export function createArcade(ctx, steer) {
     if (!run || run.over) return;
     btnNext.hidden = true;
     const s = pickSample();
+    ctx.autoSampleText = s.text; // picked by the game, so Detect will not reuse it
     panel.setText(s.text);
     steer.start(s.text, { keepSnake: true });
     btnHint.hidden = false;

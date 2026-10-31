@@ -44,7 +44,8 @@ export function createDetect(ctx, replay) {
     enter() {
       active = true;
       panel.setEditable(true);
-      if (!panel.text().trim() && !ctx.isUrl(panel.text())) ctx.loadRandomSample();
+      // Detect waits for the player: a sample another mode loaded on its own is not carried over.
+      if (ctx.autoSampleText && panel.text() === ctx.autoSampleText) { ctx.autoSampleText = null; panel.setText(''); }
       else onText(panel.text(), {});
     },
     exit() {

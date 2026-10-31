@@ -257,7 +257,7 @@ Free exploration with no text.
 
 The player finds the route for a text (pasted, fetched from a URL, or a sample) by moving the snake.
 
-- At each station the snake stops. The player picks a line with the arrow keys, the `Y`/`N` keys, a swipe, a tap on the next station, or the on-screen Y and N buttons. Arrow keys follow the chart's geometry, so the player has to read the Y and N labels, as on the poster.
+- At each station the snake stops. The player picks a line with the arrow keys, the `Y`/`N` keys, a swipe, a tap on the next station, or the on-screen Y and N buttons. The Y and N buttons sit over the board in Steer and Arcade on every screen size, and show an arrow for the direction each line leaves the current station. Arrow keys follow the chart's geometry, so the player has to read the Y and N labels, as on the poster.
 - A correct choice moves the snake on and lengthens it (section 5.2). On a Y, the matching letters get the marigold highlighter and fly into the snake's head before it grows.
 - A wrong choice: the head bumps into a wall (screen shake if enabled, red flash, buzz) and the error count goes up. The snake explains the mistake in a `.dialogue` bubble with its own portrait, and the text panel shows the evidence:
   - The answer was Y and the player chose N: all occurrences are highlighted in red, the panel scrolls to the first one, and a callout points at it: "ä, character 87 (line 3, column 12)."
@@ -329,7 +329,7 @@ Board keys act only when the text panel does not have focus. On touch screens an
 
 ## 9. Screen layout
 
-The first screen is the game: Detect mode with a random sample already routed, so the board shows a snake on a route.
+The first screen is Detect with an empty text box and the snake waiting at `F G R`. Nothing is routed until the player types, pastes, fetches a URL or presses "Try a sample". A sample that Steer or Arcade loaded on its own is not carried into Detect; text the player chose is.
 
 - Desktop (≥ 900 px wide): the compact site bar (section 12.3). Below it, the project header with the h1 "Which European language am I reading?" (Sansita 900). Below that, the mode tabs as a `.segmented` control, with collection, options and about buttons. The board takes about 60% of the width on the left; the text panel and route list sit on the right.
 - Phone: the compact site bar with its hamburger menu (drawn above the board and its tools), then a smaller project header, the mode tabs and smaller board tools. The board fills the space above the bottom sheet, and the on-screen pad sits over the board. The bottom sheet has three heights: collapsed to its handle (the board grows to fill the screen), peek (30% of the screen, the default) and open (88%). Tapping the handle cycles collapsed, peek, open; dragging it moves one step up or down. Touch targets on the board are at least 34 px and the pad stays at 60 px. There is no horizontal page scroll, and HUD chips wrap.
