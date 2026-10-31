@@ -83,6 +83,9 @@ body { overflow-x: clip; }
 .flag-frame { fill: none; stroke: var(--ink); stroke-width: 2.6; }
 .leaf-glow { fill: none; stroke: var(--marigold); stroke-width: 4; opacity: 0; }
 .leaf.on .leaf-glow { opacity: 1; }
+/* The destination flag breathes so it is easy to spot on the full poster; 12 drawings a second, as the game style asks. */
+.leaf.on .leaf-pulse { animation: leaf-pulse 1s steps(12) infinite alternate; }
+@keyframes leaf-pulse { from { transform: scale(1); } to { transform: scale(1.3); } }
 .leaf:focus-visible .flag-frame { stroke: var(--cobalt); stroke-dasharray: 4 3; }
 .flag-fog { fill: url(#fog-hatch); opacity: 0; }
 .leaf.fog .flag-fog { opacity: 1; }

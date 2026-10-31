@@ -153,12 +153,14 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
     const s = lf.size, h = s / 2;
     const g = el('g', { class: 'leaf', transform: `translate(${x} ${y})`, 'data-lf': code, tabindex: -1, role: 'img' }, gFlags);
     g.setAttribute('aria-label', `${lf.label}, ${lf.english}. Flag of ${lf.flagNote}.`);
-    el('rect', { x: -h + 2.6, y: -h + 2.6, width: s, height: s, class: 'flag-shadow' }, g);
-    el('rect', { x: -h - 3.5, y: -h - 3.5, width: s + 7, height: s + 7, class: 'leaf-glow' }, g);
+    // Inner group so the destination pulse can scale the flag without touching the outer translate.
+    const p = el('g', { class: 'leaf-pulse' }, g);
+    el('rect', { x: -h + 2.6, y: -h + 2.6, width: s, height: s, class: 'flag-shadow' }, p);
+    el('rect', { x: -h - 3.5, y: -h - 3.5, width: s + 7, height: s + 7, class: 'leaf-glow' }, p);
     const info = flags.leaves[code] ?? { files: [], layout: 'single' };
-    drawFlag(g, info, s, aspect);
-    el('rect', { x: -h, y: -h, width: s, height: s, class: 'flag-fog' }, g);
-    el('rect', { x: -h, y: -h, width: s, height: s, class: 'flag-frame' }, g);
+    drawFlag(p, info, s, aspect);
+    el('rect', { x: -h, y: -h, width: s, height: s, class: 'flag-fog' }, p);
+    el('rect', { x: -h, y: -h, width: s, height: s, class: 'flag-frame' }, p);
     leafEls[code] = g;
 
     const side = lf.labelSide;
@@ -406,21 +408,21 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
     svg.classList.toggle('has-dim', !!set);
     for (const [id, e] of Object.entries(edgeEls)) cls(e.g, 'dim', set && !set.has(id));
   }
-  /** route = steps [{station, answer}], leaf code. */
-  function showRoute(steps, leaf) {
+  /** route = steps [{station, answer}], leaf code. Only the first `lit` steps are lit; the rest stay as a dimmed path ahead. */
+  function showRoute(steps, leaf, lit = steps.length) {
     clearRoute();
-    const set = new Set();
-    steps.forEach((s, i) => {
-      const eid = edgeId(s.station, s.answer);
-      set.add(eid);
-      cls(edgeEls[eid].hl, 'on', true);
-      cls(stEls[s.station].halo, s.answer ? 'yes' : 'no', true);
-      const b = badgeFor(s.station);
-      b.t.textContent = i + 1;
-      cls(b.g, 'show', true);
-    });
-    if (leaf) cls(leafEls[leaf], 'on', true);
+    const set = new Set(steps.map((s) => edgeId(s.station, s.answer)));
+    for (let i = 0; i < Math.min(lit, steps.length); i++) lightStep(steps[i], i);
+    if (leaf && lit >= steps.length) cls(leafEls[leaf], 'on', true);
     setDim(set);
+  }
+  /** Light one step of a route: its line, the station's Y/N halo and its step-number badge. */
+  function lightStep(s, i) {
+    cls(edgeEls[edgeId(s.station, s.answer)].hl, 'on', true);
+    cls(stEls[s.station].halo, s.answer ? 'yes' : 'no', true);
+    const b = badgeFor(s.station);
+    b.t.textContent = i + 1;
+    cls(b.g, 'show', true);
   }
   function clearRoute() {
     for (const e of Object.values(edgeEls)) { e.hl.classList.remove('on', 'focus'); }
@@ -558,7 +560,7 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
     get zoom() { return cam.tz; },
     get fit() { return fitZoom(); },
     setPanMode(v) { panMode = v; },
-    showRoute, clearRoute, focusStep, here, strike, clearMarks, block, setFog, mark, setTabbable, setDim,
+    showRoute, lightStep, clearRoute, focusStep, here, strike, clearMarks, block, setFog, mark, setTabbable, setDim,
     toScreen, headScreen: () => toScreen(sn.x, sn.y),
     refresh: touch,
   };

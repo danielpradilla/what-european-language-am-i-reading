@@ -246,7 +246,7 @@ Free exploration with no text.
 
 ### 6.2 Detect (paste, type or URL)
 
-- When the text changes (paste, URL fetch, or typing with a 120 ms debounce), the engine routes it. The board draws the route and the snake runs along it at 4× speed. With reduced motion the route appears at once.
+- When the text changes (paste, URL fetch, or typing with a 120 ms debounce), the engine routes it. The snake runs the route at 4× speed. Each line lights up in marigold, with its station's halo and step number, as the snake leaves the station, and stays lit, so the trail from `F G R` remains visible; lines off the route are dimmed. The snake grows as it goes, like the classic snake game: two segments per station passed and four per Y station (letters eaten), up to 60. On arrival the destination flag keeps growing and shrinking (to 130%, 12 drawings a second) so it stands out on the full poster. With reduced motion the route appears at once and the flag does not pulse.
 - The text panel puts the marigold highlighter on every hit of every Y step, with the step number on the first hit. Hovering or focusing a step in the route list, or its station on the board, scrolls to that step's first hit and outlines its hits in `--cobalt`.
 - The route list shows one line per step: `ä  Y  ×14  first at line 3, col 12` or `ő ű  N`.
 - Live typing: when an edit changes the route, the snake reruns from the first changed step, and the character that caused the change is outlined for 1.5 s with a note such as "You typed ř: the route moved to the Czech branch."

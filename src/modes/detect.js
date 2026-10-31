@@ -55,15 +55,21 @@ export function createDetect(ctx) {
     if (s.answer) { panel.setHighlight('hl-focus', s.hits); panel.scrollTo(s.hits[0].start); } else panel.clearHighlight('hl-focus');
   }
 
+  // Snake-game growth: every station passed adds a segment, a Y (letters eaten) adds two.
+  const growth = (steps, n) => Math.min(steps.slice(0, n).reduce((a, s) => a + (s.answer ? 4 : 2), 0), 60);
+
   async function play(from = 0, speed = 4) {
     const my = ++token;
     board.cancelMove();
     const steps = route.steps;
     board.here(null);
+    board.showRoute(steps, null, from); // the trail so far stays lit; the rest lights up as the snake passes
+    board.setExtra(growth(steps, from));
     board.teleport(...board.nodePos(steps[Math.min(from, steps.length - 1)].station));
     for (let i = from; i < steps.length; i++) {
       const e = board.graph.edges[`${steps[i].station}|${steps[i].answer ? 'y' : 'n'}`];
-      if (steps[i].answer) board.setExtra(Math.min(board.extra + 1, 12));
+      board.lightStep(steps[i], i);
+      board.setExtra(growth(steps, i + 1));
       audio.tick();
       if (!(await board.moveAlong(e.points, { speed })) || my !== token) return;
     }
@@ -72,6 +78,7 @@ export function createDetect(ctx) {
   }
   function arrived() {
     const code = route.leaf;
+    board.mark(code, 'on', true);
     audio.fanfare();
     board.flash('good');
     ui.burst('Found!', chart.leaves[code].english);
@@ -88,17 +95,15 @@ export function createDetect(ctx) {
     ui.clearNotice('empty');
     route = engine.route(text);
     ui.clearNotice('scripts');
-    board.setExtra(0);
     if (!route.leaf) {
       prevSteps = null; token++;
-      board.cancelMove(); board.clearRoute(); board.overview(); board.teleport(...board.nodePos(chart.root)); board.here(chart.root);
+      board.cancelMove(); board.clearRoute(); board.setExtra(0); board.overview(); board.teleport(...board.nodePos(chart.root)); board.here(chart.root);
       renderList(); paintText(); focusStep(-1); whyOut.textContent = '';
       if (text.trim()) ui.notice('empty', 'info', 'No letters to follow', 'Digits and punctuation do not say anything about a language.');
       else ui.notice('empty', 'info', 'Nothing to read yet', 'Type, paste text or a web address, or try a sample.');
       return;
     }
     if (!route.european) ui.notice('scripts', 'warning', 'This chart only covers European alphabets.', 'The route below is where the chart sends it anyway.');
-    board.showRoute(route.steps, route.leaf);
     renderList(); paintText(); focusStep(-1); runWhy();
     const box = board.bboxOf([board.nodePos(chart.root), ...route.steps.flatMap((s) => board.graph.edges[`${s.station}|${s.answer ? 'y' : 'n'}`].points), board.nodePos(`L:${route.leaf}`)]);
     board.frame(box, { pad: 60, maxZ: 2.4 });
