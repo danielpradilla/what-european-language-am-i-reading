@@ -211,7 +211,7 @@ The board is SVG, one `<g>` per station and terminal and one `<path>` per edge, 
 
 The snake moves one sub-cell per tick (25 ms by default, faster at higher Arcade levels). At a station it stops and waits for a choice (Maze, Steer, Arcade) or continues on its own (Detect playback).
 
-The camera follows the head with easing. `O` or the overview button fits the whole chart on screen. Zoom with pinch, Ctrl + wheel, or `+` and `-`. A minimap in the corner shows the head's position on the whole chart.
+The camera follows the head with easing. `O` or the overview button fits the whole chart on screen. Zoom with pinch, Ctrl + wheel, the scroll wheel once the board has focus (click or tab into it; the page scrolls normally otherwise), or `+` and `-`. A minimap in the corner shows the head's position on the whole chart.
 
 ### 5.4 Flags
 

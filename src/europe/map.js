@@ -302,10 +302,12 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
   svg.addEventListener('pointerup', up);
   svg.addEventListener('pointercancel', up);
   svg.addEventListener('wheel', (e) => {
-    if (!e.ctrlKey) return;
+    // Ctrl-wheel is a trackpad pinch; a plain wheel zooms only once the map has focus, so the page still scrolls past it.
+    if (!e.ctrlKey && !svg.contains(document.activeElement)) return;
     e.preventDefault();
     const r = svg.getBoundingClientRect();
-    zoomBy(Math.exp(-e.deltaY * 0.01), e.clientX - r.left, e.clientY - r.top);
+    const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? r.height : 1);
+    zoomBy(Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.002)), e.clientX - r.left, e.clientY - r.top);
   }, { passive: false });
   svg.addEventListener('click', (e) => {
     if (moved > 12) return; // a drag, not a tap

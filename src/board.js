@@ -524,10 +524,12 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
   svg.addEventListener('pointerup', up);
   svg.addEventListener('pointercancel', up);
   svg.addEventListener('wheel', (e) => {
-    if (!e.ctrlKey) return;
+    // Ctrl-wheel is a trackpad pinch; a plain wheel zooms only once the board has focus, so the page still scrolls past it.
+    if (!e.ctrlKey && !svg.contains(document.activeElement)) return;
     e.preventDefault();
     const r = svg.getBoundingClientRect();
-    zoomBy(Math.exp(-e.deltaY * 0.01), e.clientX - r.left, e.clientY - r.top);
+    const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? r.height : 1);
+    zoomBy(Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.002)), e.clientX - r.left, e.clientY - r.top);
   }, { passive: false });
 
   svg.addEventListener('click', (e) => {
