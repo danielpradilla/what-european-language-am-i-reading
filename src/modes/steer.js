@@ -2,7 +2,6 @@
 const $ = (s) => document.querySelector(s);
 const DIR_WORD = { l: 'left', r: 'right', u: 'up', d: 'down' };
 const KEYDIR = { ArrowLeft: 'l', ArrowRight: 'r', ArrowUp: 'u', ArrowDown: 'd', a: 'l', d: 'r', w: 'u', s: 'd' };
-const EXTRA_CAP = 40;
 
 export function createSteer(ctx) {
   const { engine, chart, board, panel, ui, audio, lineCol } = ctx;
@@ -91,10 +90,9 @@ export function createSteer(ctx) {
       panel.setHighlight('hl-y', r.ys);
       panel.scrollTo(step.hits[0].start);
       const rects = step.hits.slice(0, 12).map((h) => ({ text: h.seq, rect: panel.rectOf(h.start, h.end) }));
-      const grow = Math.min(step.hits.length, 5);
       ui.flyLetters(rects, board.headScreen());
-      setTimeout(() => board.setExtra(Math.min(board.extra + grow, EXTRA_CAP)), 380);
     }
+    setTimeout(() => board.grow(ans), ans ? 380 : 0); // every station passed lengthens the snake; eaten letters land first
     board.flash('good');
     board.showRoute(r.route.steps.slice(0, r.i + 1), null);
     const speed = arc?.speed?.() ?? 1;
@@ -200,7 +198,8 @@ export function createSteer(ctx) {
     board.showRoute(steps, r.route.leaf);
     board.frame(box, { pad: 60, maxZ: 2.4 });
     board.teleport(...board.nodePos(chart.root));
-    for (const s of steps) { audio.tick(); if (!(await board.moveAlong(board.graph.edges[`${s.station}|${s.answer ? 'y' : 'n'}`].points, { speed: 3 }))) return; }
+    board.setExtra(0);
+    for (const s of steps) { audio.tick(); board.grow(s.answer); if (!(await board.moveAlong(board.graph.edges[`${s.station}|${s.answer ? 'y' : 'n'}`].points, { speed: 3 }))) return; }
   }
 
   function chooseDir(dir) {

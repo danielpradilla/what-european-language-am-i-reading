@@ -238,15 +238,17 @@ button.stage-card { font: inherit; text-align: left; background: none; border: 0
   .layout { display: block; padding-bottom: 8px; }
   .board-panel { height: 55dvh; padding: 8px; }
   #minimap { width: 92px; }
-  .side { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; height: var(--peek, 36dvh); padding: 0; border-radius: 0; }
-  .side[data-open="true"] { height: 88dvh; }
+  .side { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; height: var(--peek, 30dvh); padding: 0; border-radius: 0; }
+  .side[data-sheet="open"] { height: 88dvh; }
+  .side[data-sheet="min"] { height: 46px; }
+  .side[data-sheet="min"] .side-body { visibility: hidden; }
   .side::before { border-radius: 14px 14px 0 0; border-bottom: 0; }
   .side::after { display: none; }
   .sheet-handle { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex: none; min-height: 44px; width: 100%; padding: 4px; background: none; border: 0; font: 800 0.75rem/1 var(--font-ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); cursor: pointer; touch-action: none; }
   .sheet-handle span { width: 46px; height: 5px; background: var(--ink); border-radius: 3px; }
   .side-body { padding: 4px 14px 20px; }
   .tp-edit { height: 130px; }
-  .side[data-open="true"] .tp-edit { height: 220px; }
+  .side[data-sheet="open"] .tp-edit { height: 220px; }
   .hud .meter { min-width: 0; flex-basis: 100%; }
   .hud-chip { padding: 3px 8px 3px 6px; }
   .hearts .icon { width: 24px; height: 24px; }
@@ -260,7 +262,7 @@ button.stage-card { font: inherit; text-align: left; background: none; border: 0
 .callout text { font: 700 8.4px var(--noto); fill: var(--red-deep); text-decoration: line-through 1.4px var(--red); }
 @media (max-width: 899px) {
   .segmented kbd, .steer-actions kbd { display: none; }
-  .toasts { top: auto; bottom: calc(var(--peek, 36dvh) + 10px); right: 8px; left: 8px; z-index: 300; }
+  .toasts { top: auto; bottom: calc(var(--peek, 30dvh) + 10px); right: 8px; left: 8px; z-index: 300; }
   .toast { max-width: none; }
 }
 @media (pointer: coarse) { .segmented kbd, .steer-actions kbd { display: none; } }
@@ -280,6 +282,8 @@ button.stage-card { font: inherit; text-align: left; background: none; border: 0
   .hud .meter { gap: 6px; }
   .meter-track { height: 16px; }
 }
+/* The site bar's hamburger menu must open above the board and its tools. */
+.dp-navbar { position: relative; z-index: 400; }
 
 /* ---------- Europe map page (europe.html) ---------- */
 .note-success { --tone: var(--teal); }
@@ -373,3 +377,21 @@ button.lg-main:hover, button.lg-main:focus-visible { background: var(--paper-dee
 .map-off .eu-scene { display: none; }
 .map-off #minimap .mm-land { display: none; }
 .map-off #minimap .mm-sea { fill: var(--card); }
+/* Phone: smaller header, tabs and board tools so the board gets the room. */
+@media (max-width: 600px) {
+  .shell { padding: 0 10px; }
+  .app-head { padding: 6px 0 6px; }
+  .app-head h1 { font-size: 1.3rem; line-height: 1.15; }
+  .toolbar { gap: 6px; padding-bottom: 8px; }
+  .tools { gap: 6px; }
+  .segmented button { min-height: 38px; padding: 0 9px; font-size: 0.9rem; }
+  .tools .btn { min-height: 34px; padding: 0 9px; font-size: 0.82rem; box-shadow: 2px 2px 0 var(--ink); }
+  .board-panel { padding: 6px; }
+  .board-tools { top: 6px; right: 6px; gap: 4px; }
+  .board-tools .btn { min-width: 34px; min-height: 34px; padding: 0 7px; font-size: 0.78rem; box-shadow: 2px 2px 0 var(--ink); }
+  .board-map { padding: 0 7px; font-size: 0.78rem; box-shadow: 2px 2px 0 var(--ink); gap: 5px; }
+  .board-map .toggle { transform: scale(0.75); margin: 0 -5px; }
+  #minimap, .eu #minimap { width: 64px; }
+  .eu-chip { top: 46px; }
+  .sheet-handle { min-height: 40px; }
+}

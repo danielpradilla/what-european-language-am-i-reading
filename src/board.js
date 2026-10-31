@@ -8,6 +8,9 @@ const BASE_CELLS = 5;
 const DIRS = { l: [-1, 0], r: [1, 0], u: [0, -1], d: [0, 1] };
 export const DIR_WORD = { l: 'left', r: 'right', u: 'up', d: 'down' };
 const OPP = { l: 'r', r: 'l', u: 'd', d: 'u' };
+// Snake-game growth, the same in every mode: 2 segments per station passed, 4 at a Y station (letters eaten).
+const MAX_EXTRA = 60;
+const stepGrowth = (answer) => (answer ? 4 : 2);
 
 const el = (tag, attrs = {}, parent) => {
   const e = document.createElementNS(NS, tag);
@@ -268,7 +271,11 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
       sn.trail.shift();
     }
   };
-  function setExtra(n) { sn.extra = Math.max(0, n); sn.tlen = (BASE_CELLS + sn.extra) * CELL; if (reduced()) sn.len = sn.tlen; touchSnake(); }
+  function setExtra(n) { sn.extra = Math.min(Math.max(0, n), MAX_EXTRA); sn.tlen = (BASE_CELLS + sn.extra) * CELL; if (reduced()) sn.len = sn.tlen; touchSnake(); }
+  /** Grow for one station passed with this answer. */
+  const grow = (answer) => setExtra(sn.extra + stepGrowth(answer));
+  /** Length after travelling these steps from the start. */
+  const growthFor = (steps) => steps.reduce((a, s) => a + stepGrowth(s.answer), 0);
   function teleport(x, y) {
     cancelMove();
     sn.x = x; sn.y = y;
@@ -560,7 +567,7 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
     get zoom() { return cam.tz; },
     get fit() { return fitZoom(); },
     setPanMode(v) { panMode = v; },
-    showRoute, lightStep, clearRoute, focusStep, here, strike, clearMarks, block, setFog, mark, setTabbable, setDim,
+    showRoute, lightStep, clearRoute, focusStep, here, strike, clearMarks, block, setFog, mark, setTabbable, setDim, grow, growthFor,
     toScreen, headScreen: () => toScreen(sn.x, sn.y),
     refresh: touch,
   };

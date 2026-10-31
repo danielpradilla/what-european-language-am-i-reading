@@ -199,6 +199,7 @@ The board is SVG, one `<g>` per station and terminal and one `<path>` per edge, 
 - Stations: `--card` circles with a `--line` ink outline through the `#ink-wobble` filter, with the test sequences in ink. The station the snake is on gets a `--line-heavy` outline.
 - Terminals: the flag in its own colours inside a square ink frame (`--line-heavy`, hard `4px 4px 0` shadow), with the chart label underneath in Sansita 700.
 - Snake: the player character, so it uses `--pink`, the colour the guide reserves for characters. Rounded segments with an ink outline and a halftone shade on the lower right (light from the top left). The rubber-hose head has eyes that face the direction of travel and squashes and stretches by up to 10% on turns.
+- Growth, the same in every mode, like the classic snake game: the snake grows two segments for every station it passes and four at a Y station (letters eaten), up to 60 extra segments. Maze: the length follows the path walked from `F G R`, so going back shrinks it. Detect and the Steer replay: it grows step by step along the route. Steer and Arcade: it grows on every correct turn.
 - Route highlighting: each colour keeps the one meaning the guide gives it.
   - Letters that answered Y get the marigold highlighter (`.swipe`) in the text panel, and their station gets a marigold ring.
   - The board, the route list and the text show the same step-number badge (Recursive 900), which links them.
@@ -246,7 +247,7 @@ Free exploration with no text.
 
 ### 6.2 Detect (paste, type or URL)
 
-- When the text changes (paste, URL fetch, or typing with a 120 ms debounce), the engine routes it. The snake runs the route at 4× speed. Each line lights up in marigold, with its station's halo and step number, as the snake leaves the station, and stays lit, so the trail from `F G R` remains visible; lines off the route are dimmed. The snake grows as it goes, like the classic snake game: two segments per station passed and four per Y station (letters eaten), up to 60. On arrival the destination flag keeps growing and shrinking (to 130%, 12 drawings a second) so it stands out on the full poster. With reduced motion the route appears at once and the flag does not pulse.
+- When the text changes (paste, URL fetch, or typing with a 120 ms debounce), the engine routes it. The snake runs the route at 4× speed. Each line lights up in marigold, with its station's halo and step number, as the snake leaves the station, and stays lit, so the trail from `F G R` remains visible; lines off the route are dimmed. The snake grows as it goes (section 5.2). On arrival the destination flag keeps growing and shrinking (to 130%, 12 drawings a second) so it stands out on the full poster. With reduced motion the route appears at once and the flag does not pulse.
 - The text panel puts the marigold highlighter on every hit of every Y step, with the step number on the first hit. Hovering or focusing a step in the route list, or its station on the board, scrolls to that step's first hit and outlines its hits in `--cobalt`.
 - The route list shows one line per step: `ä  Y  ×14  first at line 3, col 12` or `ő ű  N`.
 - Live typing: when an edit changes the route, the snake reruns from the first changed step, and the character that caused the change is outlined for 1.5 s with a note such as "You typed ř: the route moved to the Czech branch."
@@ -257,7 +258,7 @@ Free exploration with no text.
 The player finds the route for a text (pasted, fetched from a URL, or a sample) by moving the snake.
 
 - At each station the snake stops. The player picks a line with the arrow keys, the `Y`/`N` keys, a swipe, a tap on the next station, or the on-screen Y and N buttons. Arrow keys follow the chart's geometry, so the player has to read the Y and N labels, as on the poster.
-- A correct choice moves the snake on. On a Y, the matching letters get the marigold highlighter and fly into the snake's head, and the snake grows by one segment per letter (capped at 5).
+- A correct choice moves the snake on and lengthens it (section 5.2). On a Y, the matching letters get the marigold highlighter and fly into the snake's head before it grows.
 - A wrong choice: the head bumps into a wall (screen shake if enabled, red flash, buzz) and the error count goes up. The snake explains the mistake in a `.dialogue` bubble with its own portrait, and the text panel shows the evidence:
   - The answer was Y and the player chose N: all occurrences are highlighted in red, the panel scrolls to the first one, and a callout points at it: "ä, character 87 (line 3, column 12)."
   - The answer was N and the player chose Y: the text has no character to highlight. The station's letters are struck through on the board and a banner says "None of ő ű appear in the text."
@@ -331,7 +332,7 @@ Board keys act only when the text panel does not have focus. On touch screens an
 The first screen is the game: Detect mode with a random sample already routed, so the board shows a snake on a route.
 
 - Desktop (≥ 900 px wide): the compact site bar (section 12.3). Below it, the project header with the h1 "Which European language am I reading?" (Sansita 900). Below that, the mode tabs as a `.segmented` control, with collection, options and about buttons. The board takes about 60% of the width on the left; the text panel and route list sit on the right.
-- Phone: the compact site bar with its hamburger menu, then the project header and mode tabs. The board sits on top (about 55% of the remaining height), the text panel is a bottom sheet that can be dragged up, and the on-screen pad sits over the board. Touch targets are at least 44 px. There is no horizontal page scroll, and HUD chips wrap.
+- Phone: the compact site bar with its hamburger menu (drawn above the board and its tools), then a smaller project header, the mode tabs and smaller board tools. The board fills the space above the bottom sheet, and the on-screen pad sits over the board. The bottom sheet has three heights: collapsed to its handle (the board grows to fill the screen), peek (30% of the screen, the default) and open (88%). Tapping the handle cycles collapsed, peek, open; dragging it moves one step up or down. Touch targets on the board are at least 34 px and the pad stays at 60 px. There is no horizontal page scroll, and HUD chips wrap.
 
 ## 10. Sound and motion
 

@@ -75,32 +75,45 @@ export function setupText(ctx, { panelMod, urlMod, onInput }) {
   $('#btn-clear').addEventListener('click', () => { meta = null; panel.setText(''); panel.focus(); });
 }
 
-/** Phone layout: the board sits on top and the side panel is a draggable bottom sheet. Returns layout(). */
+/** Phone layout: the board sits on top and the side panel is a bottom sheet with three heights:
+ *  'min' (handle only, the board gets the room), 'peek' (default) and 'open'. Returns layout() and setSheet(). */
 export function setupSheet() {
   const side = $('#side'), handle = $('#sheet-handle'), boardPanel = document.querySelector('.board-panel');
   const narrow = matchMedia('(max-width: 899px)');
+  const MIN = 46;
+  const ORDER = ['min', 'peek', 'open'];
+  let state = 'peek';
   function layout() {
     if (!narrow.matches) { boardPanel.style.height = ''; side.style.removeProperty('--peek'); document.body.style.paddingBottom = ''; return; }
-    const peek = Math.round(innerHeight * 0.36);
+    const peek = Math.round(innerHeight * 0.3);
+    const below = state === 'min' ? MIN : peek; // 'open' covers the board on purpose; the board keeps its peek size
     side.style.setProperty('--peek', `${peek}px`);
-    document.body.style.paddingBottom = `${peek}px`;
+    document.body.style.paddingBottom = `${below}px`;
     const top = boardPanel.getBoundingClientRect().top + scrollY;
-    boardPanel.style.height = `${Math.max(260, innerHeight - top - peek - 6)}px`;
+    boardPanel.style.height = `${Math.max(240, innerHeight - top - below - 6)}px`;
+  }
+  function setSheet(s) {
+    state = s;
+    side.dataset.sheet = s;
+    handle.setAttribute('aria-expanded', String(s !== 'min'));
+    layout();
   }
   addEventListener('resize', layout);
   narrow.addEventListener('change', layout);
-  const setOpen = (open) => { side.dataset.open = open; handle.setAttribute('aria-expanded', String(open)); };
-  handle.addEventListener('click', () => setOpen(side.dataset.open !== 'true'));
+  // Tap: min -> peek -> open -> min. Drag: one step up or down.
+  handle.addEventListener('click', () => setSheet(ORDER[(ORDER.indexOf(state) + 1) % ORDER.length]));
   let drag = null;
   handle.addEventListener('pointerdown', (e) => { drag = { y: e.clientY, moved: false }; });
   addEventListener('pointermove', (e) => { if (drag && Math.abs(e.clientY - drag.y) > 18) drag.moved = true; });
   addEventListener('pointerup', (e) => {
     if (!drag) return;
     if (drag.moved) {
-      setOpen(e.clientY < drag.y);
+      const i = ORDER.indexOf(state) + (e.clientY < drag.y ? 1 : -1);
+      setSheet(ORDER[Math.max(0, Math.min(ORDER.length - 1, i))]);
       handle.addEventListener('click', (ev) => ev.stopImmediatePropagation(), { once: true, capture: true });
     }
     drag = null;
   });
-  return { layout, setOpen };
+  side.dataset.sheet = state;
+  return { layout, setSheet };
 }

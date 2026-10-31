@@ -45,7 +45,7 @@ export function createMaze(ctx) {
     const o = key.startsWith('L:') ? null : board.graph.out[key];
     const ids = new Set([key, ...(o ? [o.y.to, o.n.to] : [cur().via?.from])].filter((k) => k && !k.startsWith('L:')));
     board.setTabbable(ids);
-    board.setExtra(Math.min(stack.length - 1, 14));
+    board.setExtra(board.growthFor(stack.slice(1).map((s) => s.via))); // grows with the path walked; going back shrinks it
     board.setDim(travelled.size ? travelled : null);
     render();
     if (key.startsWith('L:')) {

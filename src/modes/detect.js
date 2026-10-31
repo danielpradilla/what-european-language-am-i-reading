@@ -55,21 +55,18 @@ export function createDetect(ctx) {
     if (s.answer) { panel.setHighlight('hl-focus', s.hits); panel.scrollTo(s.hits[0].start); } else panel.clearHighlight('hl-focus');
   }
 
-  // Snake-game growth: every station passed adds a segment, a Y (letters eaten) adds two.
-  const growth = (steps, n) => Math.min(steps.slice(0, n).reduce((a, s) => a + (s.answer ? 4 : 2), 0), 60);
-
   async function play(from = 0, speed = 4) {
     const my = ++token;
     board.cancelMove();
     const steps = route.steps;
     board.here(null);
     board.showRoute(steps, null, from); // the trail so far stays lit; the rest lights up as the snake passes
-    board.setExtra(growth(steps, from));
+    board.setExtra(board.growthFor(steps.slice(0, from)));
     board.teleport(...board.nodePos(steps[Math.min(from, steps.length - 1)].station));
     for (let i = from; i < steps.length; i++) {
       const e = board.graph.edges[`${steps[i].station}|${steps[i].answer ? 'y' : 'n'}`];
       board.lightStep(steps[i], i);
-      board.setExtra(growth(steps, i + 1));
+      board.grow(steps[i].answer);
       audio.tick();
       if (!(await board.moveAlong(e.points, { speed })) || my !== token) return;
     }
