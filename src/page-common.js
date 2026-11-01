@@ -80,13 +80,14 @@ export function setupText(ctx, { panelMod, urlMod, onInput }) {
 }
 
 /** Phone layout: the board sits on top and the side panel is a bottom sheet with three heights:
- *  'min' (handle only, the board gets the room), 'peek' (default) and 'open'. Returns layout() and setSheet(). */
+ *  'min' (handle only, the board gets the room; the start state), 'peek' (medium) and 'open' (large). Returns layout() and setSheet(). */
 export function setupSheet() {
   const side = $('#side'), handle = $('#sheet-handle'), boardPanel = document.querySelector('.board-panel');
   const narrow = matchMedia('(max-width: 899px)');
   const MIN = 46;
-  const ORDER = ['min', 'peek', 'open'];
-  let state = 'peek';
+  const BY_SIZE = ['min', 'peek', 'open'];
+  const TAP_NEXT = { min: 'open', open: 'peek', peek: 'min' };
+  let state = 'min';
   function layout() {
     if (!narrow.matches) { boardPanel.style.height = ''; side.style.removeProperty('--peek'); document.body.style.paddingBottom = ''; return; }
     const peek = Math.round(innerHeight * 0.3);
@@ -104,16 +105,16 @@ export function setupSheet() {
   }
   addEventListener('resize', layout);
   narrow.addEventListener('change', layout);
-  // Tap: min -> peek -> open -> min. Drag: one step up or down.
-  handle.addEventListener('click', () => setSheet(ORDER[(ORDER.indexOf(state) + 1) % ORDER.length]));
+  // Tap: closed -> large -> medium -> closed. Drag: one size up or down.
+  handle.addEventListener('click', () => setSheet(TAP_NEXT[state]));
   let drag = null;
   handle.addEventListener('pointerdown', (e) => { drag = { y: e.clientY, moved: false }; });
   addEventListener('pointermove', (e) => { if (drag && Math.abs(e.clientY - drag.y) > 18) drag.moved = true; });
   addEventListener('pointerup', (e) => {
     if (!drag) return;
     if (drag.moved) {
-      const i = ORDER.indexOf(state) + (e.clientY < drag.y ? 1 : -1);
-      setSheet(ORDER[Math.max(0, Math.min(ORDER.length - 1, i))]);
+      const i = BY_SIZE.indexOf(state) + (e.clientY < drag.y ? 1 : -1);
+      setSheet(BY_SIZE[Math.max(0, Math.min(BY_SIZE.length - 1, i))]);
       handle.addEventListener('click', (ev) => ev.stopImmediatePropagation(), { once: true, capture: true });
     }
     drag = null;
