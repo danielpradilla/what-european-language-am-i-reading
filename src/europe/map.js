@@ -238,7 +238,7 @@ export function createEuropeMap({ svg, mini, wrap, europe, leaves, flags, aspect
   const mView = el('rect', { class: 'mm-view' }, mini);
 
   // ---------- camera ----------
-  let W = 800, H = 600, dirty = true, raf = 0, willOn = false, settleT = 0;
+  let W = 800, H = 600, dirty = true, raf = 0, willOn = false, settleT = 0, rasterZ = 0;
   const wake = () => { clearTimeout(settleT); if (!raf) raf = requestAnimationFrame(tick); };
   const touch = () => { dirty = true; wake(); };
   const cam = { x: WORLD.w / 2, y: WORLD.h / 2, z: 0.5, tx: WORLD.w / 2, ty: WORLD.h / 2, tz: 0.5 };
@@ -290,13 +290,19 @@ export function createEuropeMap({ svg, mini, wrap, europe, leaves, flags, aspect
     cam.x += (cam.tx - cam.x) * k; cam.y += (cam.ty - cam.y) * k; cam.z += (cam.tz - cam.z) * k;
     const done = Math.abs(cam.tx - cam.x) < 0.3 && Math.abs(cam.ty - cam.y) < 0.3 && Math.abs(cam.tz - cam.z) < 0.0005;
     if (done) Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz });
-    // Promote the layer only while it moves; settled, Chrome re-rasters at the final scale (crisp text and flags).
+    // The layer stays promoted so a pan or the start of a gesture never repaints the whole map (WebKit took 300-600 ms).
+    // After a zoom settles it is dropped for two frames, so the browser repaints it crisp at the new scale.
     if (!willOn) { layer.style.willChange = 'transform'; willOn = true; }
     layer.style.transform = `translate(${(W / 2 - cam.x * cam.z).toFixed(2)}px,${(H / 2 - cam.y * cam.z).toFixed(2)}px) scale(${cam.z.toFixed(4)})`;
     gCam.classList.toggle('z-lo', cam.z < 0.62);
     mView.setAttribute('x', cam.x - W / 2 / cam.z); mView.setAttribute('y', cam.y - H / 2 / cam.z);
     mView.setAttribute('width', W / cam.z); mView.setAttribute('height', H / cam.z);
-    if (done) { dirty = false; settleT = setTimeout(() => { layer.style.willChange = ''; willOn = false; }, 150); } else raf = requestAnimationFrame(tick);
+    if (done) { dirty = false; if (Math.abs(cam.z - rasterZ) > 1e-4) settleT = setTimeout(reraster, 150); } else raf = requestAnimationFrame(tick);
+  }
+  function reraster() {
+    rasterZ = cam.z;
+    layer.style.willChange = ''; willOn = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => { if (!willOn) { layer.style.willChange = 'transform'; willOn = true; } }));
   }
   wake();
 
@@ -315,9 +321,13 @@ export function createEuropeMap({ svg, mini, wrap, europe, leaves, flags, aspect
     p.x = e.clientX; p.y = e.clientY;
     moved += Math.abs(dx) + Math.abs(dy);
     if (ptrs.size === 2) {
+      // Direct manipulation: zoom about the fingers' midpoint and pan with it, without the camera's easing.
       const [a, b] = [...ptrs.values()];
       const d = Math.hypot(a.x - b.x, a.y - b.y);
-      if (pinch0) { const r = svg.getBoundingClientRect(); zoomBy(d / pinch0, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top); }
+      const r = svg.getBoundingClientRect();
+      cam.tx -= dx / 2 / cam.tz; cam.ty -= dy / 2 / cam.tz;
+      if (pinch0) zoomBy(d / pinch0, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top);
+      Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz }); touch();
       pinch0 = d;
     } else if (ptrs.size === 1 && moved > 4) {
       cam.tx -= dx / cam.z; cam.ty -= dy / cam.z;
@@ -334,7 +344,19 @@ export function createEuropeMap({ svg, mini, wrap, europe, leaves, flags, aspect
     const r = svg.getBoundingClientRect();
     const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? r.height : 1);
     zoomBy(Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.002)), e.clientX - r.left, e.clientY - r.top);
+    if (e.ctrlKey) { Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz }); touch(); } // a pinch follows the fingers
   }, { passive: false });
+  // Safari on macOS reports a trackpad pinch as gesture events, not ctrl-wheel; without this it zooms the whole page.
+  let gScale = 1;
+  svg.addEventListener('gesturestart', (e) => { e.preventDefault(); gScale = 1; });
+  svg.addEventListener('gesturechange', (e) => {
+    e.preventDefault();
+    if (ptrs.size) return; // iOS sends these for a touch pinch too; the pointer handler already does that one
+    const r = svg.getBoundingClientRect();
+    zoomBy(e.scale / gScale, e.clientX - r.left, e.clientY - r.top); gScale = e.scale;
+    Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz }); touch();
+  });
+  svg.addEventListener('gestureend', (e) => e.preventDefault());
   svg.addEventListener('click', (e) => {
     if (moved > 12) return; // a drag, not a tap
     const st = e.target.closest?.('[data-st]'), ln = e.target.closest?.('.eu-line, .eu-bus, .eu-badge, .eu-tag');
