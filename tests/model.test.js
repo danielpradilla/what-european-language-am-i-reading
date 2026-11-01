@@ -40,6 +40,15 @@ test('questions narrow the languages down and the asked grams are real', () => {
   assert.deepEqual(model.verdict('123 !!').ranking, []);
 });
 
+test('clues favour the winner over the chart language and occur in the text', () => {
+  const text = '¿hola cómo estás? yo estoy bien ¿y tú? bien espero que sí y que todo vaya bien';
+  const cl = model.clues(text, 'spa', 'ita');
+  assert.ok(cl.length > 0 && cl.length <= 5);
+  assert.ok(cl.every((c, i) => c.weight > 0 && (i === 0 || cl[i - 1].weight >= c.weight)));
+  assert.ok(cl.some((c) => occurrences(text, c.gram).length > 0));
+  assert.deepEqual(model.clues(text, 'spa', 'zzz'), []);
+});
+
 test('occurrences respect word edges and ignore case', () => {
   assert.deepEqual(occurrences('El gato. el perro, EL', ' el '), [{ start: 0, end: 2 }, { start: 9, end: 11 }, { start: 19, end: 21 }]);
   assert.deepEqual(occurrences('quien aqui', ' qu'), [{ start: 0, end: 2 }]);

@@ -91,6 +91,11 @@ body { overflow-x: clip; }
 /* The destination flag breathes so it is easy to spot on the full poster; 12 drawings a second, as the game style asks. */
 .leaf.on .leaf-pulse { animation: leaf-pulse 1s steps(12) infinite alternate; }
 @keyframes leaf-pulse { from { transform: scale(1); } to { transform: scale(1.3); } }
+.leaf.was { opacity: 0.6; } /* the chart's flag after a detour: still there, dimmed, dashed frame */
+.leaf.was .flag-frame { stroke-dasharray: 4 3; }
+.sc-ink, .sc-pink { fill: none; stroke-dasharray: 10 7; }
+.sc-ink { stroke: var(--ink); stroke-width: 7; }
+.sc-pink { stroke: var(--pink); stroke-width: 3.6; }
 .leaf:focus-visible .flag-frame { stroke: var(--cobalt); stroke-dasharray: 4 3; }
 .flag-fog { fill: url(#fog-hatch); opacity: 0; }
 .leaf.fog .flag-fog { opacity: 1; }
@@ -155,6 +160,7 @@ body { overflow-x: clip; }
 ::highlight(hl-focus) { background-color: var(--cobalt); color: var(--card); }
 ::highlight(hl-err) { background-color: var(--red); color: var(--card); }
 ::highlight(hl-new) { background-color: color-mix(in srgb, var(--cobalt) 25%, transparent); text-decoration: underline 3px var(--cobalt); }
+::highlight(hl-clue) { background-color: color-mix(in srgb, var(--cobalt) 18%, transparent); text-decoration: underline dashed 2px var(--cobalt); }
 .hint { margin: 0; }
 .hint code { font-size: 0.8em; }
 #text-meta:empty { display: none; }
@@ -162,6 +168,7 @@ body { overflow-x: clip; }
 .route { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .route:empty { display: none; }
 .step { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 4px 10px; text-align: left; color: var(--ink); background: var(--card); border: var(--line-fine) solid var(--ink); border-radius: var(--cut); font: 600 0.95rem/1.2 var(--font-ui); cursor: pointer; }
+.step-shortcut { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 4px 10px; font: 700 0.95rem/1.2 var(--font-ui); color: var(--ink); background: color-mix(in srgb, var(--pink) 30%, var(--card)); border: var(--line-fine) dashed var(--ink); border-radius: var(--cut); }
 .step:hover, .step.is-focus { color: var(--card); background: var(--cobalt); border-color: var(--cobalt-deep); }
 .step.is-focus .meta, .step:hover .meta { color: var(--card); }
 .step-n { flex: none; display: grid; place-items: center; min-width: 24px; height: 24px; padding: 0 4px; font: 900 0.8rem/1 var(--font-ui); --mono: 1; color: var(--ink); background: var(--marigold); border: var(--line-fine) solid var(--ink); border-radius: 50%; }

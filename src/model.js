@@ -80,6 +80,28 @@ export function createModel(m) {
     return { ranking, grams: x.grams };
   }
 
+  /** Grams in the text that favour `win` over `other`, best first: count × (log θ_win − log θ_other), positive only.
+   *  Variants of the same letters (`y`, ` y`, `y `, ` y `) count once, so the clues show different evidence. */
+  function clues(text, win, other, n = 5) {
+    const a = langs.indexOf(win), b = langs.indexOf(other);
+    if (a < 0 || b < 0) return [];
+    const { v } = featurize(text);
+    const out = [];
+    for (let f = 0; f < F; f++) {
+      const w = v[f] * (logt[a * W + f] - logt[b * W + f]);
+      if (v[f] && w > 0) out.push({ gram: gramList[f], weight: w, count: v[f] });
+    }
+    out.sort((x, y) => y.weight - x.weight);
+    const picked = [];
+    for (const c of out) {
+      const core = c.gram.trim();
+      if (picked.some((p) => { const q = p.gram.trim(); return q.includes(core) || core.includes(q); })) continue;
+      picked.push(c);
+      if (picked.length === n) break;
+    }
+    return picked;
+  }
+
   const H = (p) => { let h = 0; for (const x of p) { const c = Math.min(Math.max(x, 1e-12), 1); h -= c * Math.log(c); } return h; };
 
   /** The yes/no questions the model would ask about this text, one step each. */
@@ -132,7 +154,7 @@ export function createModel(m) {
     return steps;
   }
 
-  return { langs, grams: () => gramList, featurize, verdict, questions, occurrences, describe };
+  return { langs, grams: () => gramList, featurize, verdict, clues, questions, occurrences, describe };
 }
 
 export async function loadModel(url) {

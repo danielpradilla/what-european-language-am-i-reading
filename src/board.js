@@ -100,6 +100,7 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
   const gText = el('g', { class: 'layer-text' }, gCam);
   const gFlags = el('g', { class: 'layer-flags' }, gCam);
   const gLabels = el('g', { class: 'layer-labels' }, gCam);
+  const gShort = el('g', { class: 'layer-short' }, over); // the detour's dashed shortcut, under the snake
   const gSnake = el('g', { class: 'layer-snake' }, over);
   const gBadge = el('g', { class: 'layer-badges' }, gCam);
   const gHit = el('g', { class: 'layer-hit' }, gCam);
@@ -458,7 +459,8 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
   function clearRoute() {
     for (const e of Object.values(edgeEls)) { e.hl.classList.remove('on', 'focus'); }
     for (const s of Object.values(stEls)) { s.halo.classList.remove('yes', 'no', 'focus'); s.badge?.g.classList.remove('show'); }
-    for (const g of Object.values(leafEls)) g.classList.remove('on');
+    for (const g of Object.values(leafEls)) g.classList.remove('on', 'was');
+    gShort.replaceChildren();
     setDim(null);
   }
   function focusStep(stationId, answer) {
@@ -508,6 +510,16 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
     for (const [code, g] of Object.entries(leafEls)) cls(g, 'fog', set && !set.has(code));
   }
   function mark(code, c, v) { cls(leafEls[code], c, v); }
+  /** Dashed line from one flag to another on the overlay (no repaint of the static board); returns its two points. */
+  function shortcut(from, to) {
+    const [a, b] = [nodePos(`L:${from}`), nodePos(`L:${to}`)];
+    const d = `M${a[0]} ${a[1]}L${b[0]} ${b[1]}`;
+    gShort.replaceChildren();
+    el('path', { d, class: 'sc-ink' }, gShort);
+    el('path', { d, class: 'sc-pink' }, gShort);
+    return [a, b];
+  }
+  const clearShortcut = () => gShort.replaceChildren();
   /** Which stations can take keyboard focus (others stay reachable by pointer). */
   function setTabbable(ids) {
     for (const [id, s] of Object.entries(stEls)) s.hit.setAttribute('tabindex', ids.has(id) ? 0 : -1);
@@ -584,7 +596,7 @@ export function createBoard({ svg, mini, wrap, chart, flags, aspect, drawFlag, s
   return {
     on, graph, stationEls: stEls,
     nodePos, bboxOf,
-    overview, frame, zoomBy, setFollow, teleport, moveAlong, cancelMove, setExtra, bump, flash,
+    overview, frame, zoomBy, setFollow, teleport, moveAlong, cancelMove, setExtra, bump, flash, shortcut, clearShortcut,
     get extra() { return sn.extra + sn.travel / CELL; },
     get head() { return { x: sn.x, y: sn.y }; },
     get moving() { return !!mv; },

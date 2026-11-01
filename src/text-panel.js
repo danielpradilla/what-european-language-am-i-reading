@@ -83,7 +83,7 @@ export function createTextPanel({ edit, badgesEl, onInput }) {
   new ResizeObserver(placeBadges).observe(edit);
 
   function clearAll() {
-    for (const n of ['hl-y', 'hl-focus', 'hl-err', 'hl-new']) CSS.highlights.delete(n);
+    for (const n of ['hl-y', 'hl-focus', 'hl-err', 'hl-new', 'hl-clue']) CSS.highlights.delete(n);
     setBadges([]);
   }
 
