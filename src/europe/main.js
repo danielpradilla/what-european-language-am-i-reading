@@ -102,7 +102,7 @@ const { layout } = commonMod.setupSheet();
 ui.updateCount();
 const deepLang = location.hash.match(/^#lang=([\w-]+)$/)?.[1];
 const start = (location.hash.slice(1) in modes) ? location.hash.slice(1) : 'explore';
-map.overview(true);
+map.home(true);
 setMode(start);
 if (deepLang && europe.stations[deepLang]) { explore.select(deepLang, true); map.centerOn(deepLang, 1.2); }
 if (new URLSearchParams(location.search).has('debug')) window.wela = { ...ctx, modes, setMode, replay }; // test hook, off by default

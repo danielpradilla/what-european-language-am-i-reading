@@ -226,13 +226,18 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
   const snapIfReduced = () => { if (reduced()) Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz }); touch(); };
   new ResizeObserver(() => {
     W = wrap.clientWidth; H = wrap.clientHeight;
-    const atFit = cam.tz <= fitZoom() * 1.02 || !cam.sized;
-    cam.sized = true;
-    if (atFit) overview(true); else { cam.tz = clampZ(cam.tz); touch(); }
+    if (!cam.sized) { cam.sized = true; home(true); return; } // the first real size: start on central Europe
+    if (cam.tz <= fitZoom() * 1.02) overview(true); else { cam.tz = clampZ(cam.tz); touch(); }
   }).observe(wrap);
   function overview(snap) {
     cam.tx = WORLD.w / 2; cam.ty = WORLD.h / 2; cam.tz = fitZoom();
     if (snap) Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz }); else snapIfReduced();
+    touch();
+  }
+  /** Start view: central Europe, from the Netherlands to Belarus and from Kashubia to the Balkans, readable on a phone. */
+  function home(snap) {
+    frame(['nld', 'bel', 'csb', 'cnr', 'bul'].map((c) => pos[c]), { pad: U * 0.45, maxZ: 2 });
+    if (snap) Object.assign(cam, { x: cam.tx, y: cam.ty, z: cam.tz });
     touch();
   }
   function frame(points, { pad = 120, maxZ = 1.6 } = {}) {
@@ -375,7 +380,7 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
 
   return {
     on, pos, stEls, codes, adj, WORLD,
-    overview, frame, zoomBy, centerOn, reveal, highlightLine, mark, clearMarks, setOut, setTabStop, focusStation, neighbour,
+    overview, home, frame, zoomBy, centerOn, reveal, highlightLine, mark, clearMarks, setOut, setTabStop, focusStation, neighbour,
     get zoom() { return cam.tz; },
     get fit() { return fitZoom(); },
     refresh: touch,

@@ -517,6 +517,7 @@ The poster sorts languages by letters. This page draws the same 106 languages as
 - `europe.html` in the same app, sharing `game-style.css`, `styles.css`, the engine, the language card and the text panel.
 - Line colours are domain tokens for this page only (12 colours chosen to be distinct from each other and to work with the game style's paper and ink). They are scenery: they do not reuse the game style's state meanings, and every line also has its name printed at both ends and in a legend.
 - The site bar gets two project links on both pages, "Poster" and "Europe map", because the project now has two views.
+- The map opens zoomed on central Europe (from the Netherlands to Belarus and from Kashubia to the Balkans), where station names are readable on a phone. Overview (`O`) shows the whole map.
 - A "Map" switch beside Overview/+/− (and in Options, saved in the browser, on by default) hides the coast scenery (land, sea, lakes, sea names, coast line) so only the lines, stations, labels, transfers, Esperanto ring and line tags stay on plain paper.
 - The camera is a CSS transform on an HTML layer around the world-sized SVG (and, on the poster, the snake in its own overlay SVG), and the frame loop runs only while the camera or snake moves, so idle pages do no layout or paint work.
 - Same GA4 tag, credits, hosting and cache-busting rules as the poster page. Glottolog and Natural Earth are credited in `CREDITS.md`.
