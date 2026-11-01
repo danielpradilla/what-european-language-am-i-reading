@@ -8,11 +8,11 @@ Earlier versions: Brekke's [Latin-only flowchart](https://ebookfriendly.com/whic
 
 ## Sample texts
 
-Each sample in `data/samples.json` is a verbatim excerpt. Wikipedia and Wikimedia Incubator excerpts are CC BY-SA 4.0 and link to the exact revision. Excerpts marked "not stated" come from pages without an open licence and are quoted with attribution.
+Each sample in `data/samples.json` is a verbatim excerpt from a source whose reuse is allowed: Wikipedia and Wikimedia Incubator (CC BY-SA 4.0, linked to the exact revision or page) and, for Swiss Standard German, Swiss federal legislation, which is not protected by copyright (Swiss Copyright Act, art. 5).
 
 | Code | Language | Source | Licence |
 |---|---|---|---|
-| `rom` | Romani (Czech/Slovak spelling) | [So angle mande mol romaňi čhib?](http://www.romanohangos.cekit.cz/clanek.php?id_clanek=1491) | not stated |
+| `rom` | Romani (Czech/Slovak spelling) | [Wp/rmc/Romaňi čhib](https://incubator.wikimedia.org/wiki/Wp/rmc/Romaňi_čhib) | CC BY-SA 4.0 (Wikimedia Incubator) |
 | `rmy` | Romani (other spellings) | [Slavikane chhiba](https://rmy.wikipedia.org/w/index.php?oldid=50067) | CC BY-SA 4.0 |
 | `hsb` | Upper Sorbian | [Bochum](https://hsb.wikipedia.org/w/index.php?oldid=384268) | CC BY-SA 4.0 |
 | `dsb` | Lower Sorbian | [Alena Melicharová](https://dsb.wikipedia.org/w/index.php?oldid=143512) | CC BY-SA 4.0 |
@@ -25,7 +25,7 @@ Each sample in `data/samples.json` is a verbatim excerpt. Wikipedia and Wikimedi
 | `vep` | Veps | [Runoišt](https://vep.wikipedia.org/w/index.php?oldid=154465) | CC BY-SA 4.0 |
 | `krl` | Karelian | [Merjan kieli](https://olo.wikipedia.org/w/index.php?oldid=47914) | CC BY-SA 4.0 |
 | `slk` | Slovak | [Gruff Rhys](https://sk.wikipedia.org/w/index.php?oldid=8287889) | CC BY-SA 4.0 |
-| `sms` | Skolt Sami | [Sääʹmǩiõʹlle spesiaalsââʹjj seillmõõžž diõtt? Sääʹmpääʹljes-seminaarâst joortâʹlle ođđ vuõʹjjid ǩiõlljeälltummša](https://yle.fi/a/74-20246886) | not stated |
+| `sms` | Skolt Sami | [Wikimedia Incubator: Wp/sms/Kaʹdrel](https://incubator.wikimedia.org/wiki/Wp/sms/Kaʹdrel) | CC BY-SA 4.0 |
 | `smn` | Inari Sami | [Topâlduvah](https://smn.wikipedia.org/w/index.php?oldid=159064) | CC BY-SA 4.0 |
 | `bre` | Breton | [Rakgerioù unanennoù an SI](https://br.wikipedia.org/w/index.php?oldid=2122387) | CC BY-SA 4.0 |
 | `nld` | Dutch | [M3 (tijdschrift)](https://nl.wikipedia.org/w/index.php?oldid=70427291) | CC BY-SA 4.0 |
@@ -39,9 +39,8 @@ Each sample in `data/samples.json` is a verbatim excerpt. Wikipedia and Wikimedi
 | `oci` | Occitan | [Akkadian](https://oc.wikipedia.org/w/index.php?oldid=2477602) | CC BY-SA 4.0 |
 | `sqi` | Albanian | [Avioni i mallrave](https://sq.wikipedia.org/w/index.php?oldid=2986643) | CC BY-SA 4.0 |
 | `fur` | Friulian | [Zucar](https://fur.wikipedia.org/w/index.php?oldid=187977) | CC BY-SA 4.0 |
-| `sju` | Ume Sami | [Ursäktstal på umesamiska](https://www.svenskakyrkan.se/samiska/ursaktstal-pa-umesamiska) | not stated |
-| `smj` | Lule Sami | [Ursäktstal på lulesamiska](https://www.svenskakyrkan.se/samiska/ursaktstal-pa-lulesamiska) | not stated |
-| `sma` | Southern Sami | [Åålmeh veeljemh Sveerjesne](https://www.val.se/minoritetssprak/aarjelsaemien-giele-sydsamiska/aalmeh-veeljemh-sveerjesne-allmanna-val-i-sverige) | not stated |
+| `smj` | Lule Sami | [Wikimedia Incubator: Wp/smj/Nordlándadutkam](https://incubator.wikimedia.org/wiki/Wp/smj/Nordlándadutkam) | CC BY-SA 4.0 |
+| `sma` | Southern Sami | [Wikimedia Incubator: Wp/sma/Gaebpien Gåsta](https://incubator.wikimedia.org/wiki/Wp/sma/Gaebpien_Gåsta) | CC BY-SA 4.0 |
 | `nor` | Norwegian | [Alfons Bērziņš](https://no.wikipedia.org/w/index.php?oldid=25467717) | CC BY-SA 4.0 |
 | `dan` | Danish | [Markus Eurén](https://da.wikipedia.org/w/index.php?oldid=12100129) | CC BY-SA 4.0 |
 | `swe` | Swedish | [Gonomyia tetonensis](https://sv.wikipedia.org/w/index.php?oldid=57732022) | CC BY-SA 4.0 |
@@ -50,7 +49,7 @@ Each sample in `data/samples.json` is a verbatim excerpt. Wikipedia and Wikimedi
 | `ltz` | Luxembourgish | [Francis Blanche](https://lb.wikipedia.org/w/index.php?oldid=2632310) | CC BY-SA 4.0 |
 | `fin` | Finnish | [Muravera](https://fi.wikipedia.org/w/index.php?oldid=22129279) | CC BY-SA 4.0 |
 | `frr` | North Frisian | [Lapbloosplaanten](https://frr.wikipedia.org/w/index.php?oldid=248101) | CC BY-SA 4.0 |
-| `de-CH` | Swiss Standard German | [Gebäude- und Wohnungsstatistik (seit 2009)](https://statistik.admin.ch/de/daten-statistiken-verstehen/erhebungen/gws2009) | not stated |
+| `de-CH` | Swiss Standard German | [Bundesverfassung der Schweizerischen Eidgenossenschaft, SR 101 (Stand 3. März 2024)](https://www.fedlex.admin.ch/filestore/fedlex.data.admin.ch/eli/cc/1999/404/20240303/de/html/fedlex-data-admin-ch-eli-cc-1999-404-20240303-de-html.html) | Not protected: Swiss Copyright Act (URG, SR 231.1) art. 5 — laws and ordinances |
 | `fao` | Faroese | [Georg Hansen](https://fo.wikipedia.org/w/index.php?oldid=145006) | CC BY-SA 4.0 |
 | `isl` | Icelandic | [Ævi mín](https://is.wikipedia.org/w/index.php?oldid=1937455) | CC BY-SA 4.0 |
 | `eus` | Basque | [Bucharest Tower Center](https://eu.wikipedia.org/w/index.php?oldid=10683515) | CC BY-SA 4.0 |
@@ -73,10 +72,8 @@ Each sample in `data/samples.json` is a verbatim excerpt. Wikipedia and Wikimedi
 | `lld` | Ladin | [Lingaz ladin](https://lld.wikipedia.org/w/index.php?oldid=251925) | CC BY-SA 4.0 |
 | `ita` | Italian | [Stories and Alibis](https://it.wikipedia.org/w/index.php?oldid=146862580) | CC BY-SA 4.0 |
 | `srd` | Sardinian | [Heavy metal](https://sc.wikipedia.org/w/index.php?oldid=139080) | CC BY-SA 4.0 |
-| `tsd` | Tsakonian | [Πέφτα τσαι Παράστσι 22–23 του Οχτώμπρη 2020: Για του νέοι παροιμίλε (λιούκο): ταρ Ελένη Μάνου - Τσακώνικα με τον Πάνο (tsakonika.online)](https://tsakonika.online/%cf%80%ce%ad%cf%86%cf%84%ce%b1-%cf%84%cf%83%ce%b1%ce%b9-%cf%80%ce%b1%cf%81%ce%ac%cf%83%cf%84%cf%83%ce%b9-22-23-%cf%84%ce%bf%cf%85-%ce%bf%cf%87%cf%84%cf%8e%ce%bc%cf%80%cf%81%ce%b7-2020-%ce%b3/) | not stated |
 | `ell` | Greek | [Διοργανώσεις Ε.Π.Σ. Ηρακλείου 2015–16](https://el.wikipedia.org/w/index.php?oldid=9828938) | CC BY-SA 4.0 |
 | `hye` | Armenian | [Հնչյունական օրենք](https://hy.wikipedia.org/w/index.php?oldid=8068292) | CC BY-SA 4.0 |
-| `sva` | Svan | [ჯგჷრა̄გ](https://www.svan.ge/texts/jgrag) | not stated |
 | `xmf` | Mingrelian | [550-იანეფი](https://xmf.wikipedia.org/w/index.php?oldid=170635) | CC BY-SA 4.0 |
 | `lzz` | Laz | [ge/ვიწე - Wp/lzz - Wikimedia Incubator](https://incubator.wikimedia.org/wiki/Wp/lzz/ge/ვიწე) | CC BY-SA 4.0 |
 | `kat` | Georgian | [ხოსე რონდო](https://ka.wikipedia.org/w/index.php?oldid=5568056) | CC BY-SA 4.0 |
@@ -96,19 +93,16 @@ Each sample in `data/samples.json` is a verbatim excerpt. Wikipedia and Wikimedi
 | `mrj` | Hill Mari | [Германи халавлӓ](https://mrj.wikipedia.org/w/index.php?oldid=76169) | CC BY-SA 4.0 |
 | `kbd` | Kabardian | [Ирлэнд](https://kbd.wikipedia.org/w/index.php?oldid=48784) | CC BY-SA 4.0 |
 | `ady` | Adyghe | [Японие](https://ady.wikipedia.org/w/index.php?oldid=16400) | CC BY-SA 4.0 |
-| `tab` | Tabasaran | [Югьан 1:4–9 — Гирами Китаб (Tabasaran)](https://www.bible.com/bible/2081/JHN.1.TABCJ) | © Институт перевода Библии, 2010, 2013, 2016, 2018, 2023; license not stated |
 | `lez` | Lezgian | [ЧӀарода район](https://lez.wikipedia.org/w/index.php?oldid=98366) | CC BY-SA 4.0 |
 | `lbe` | Lak | [Лакку маз](https://lbe.wikipedia.org/w/index.php?oldid=55124) | CC BY-SA 4.0 |
 | `che` | Chechen | [Нохчийчоь](https://ce.wikipedia.org/w/index.php?oldid=26802008) | CC BY-SA 4.0 |
 | `inh` | Ingush | [Ферменташ](https://inh.wikipedia.org/w/index.php?oldid=45952) | CC BY-SA 4.0 |
-| `abq` | Abaza | [Матай йахьыла а-Инджьыль 1:17 — Abaza (2020 Institute for Bible Translation, Moscow)](https://live.bible.is/bible/abqibt/mat/1) | Copyrighted Material; Institute for Bible Translation, Moscow (2020) |
 | `ava` | Avar | [Щуланиса Абубакарил ИсмагӀил](https://av.wikipedia.org/w/index.php?oldid=100878) | CC BY-SA 4.0 |
-| `dar` | Dargwa | [Даргала-урусла словарь. Даргинско-русский словарь — ГЬАЛАГЪАЙ](https://dokumen.pub/5944340231-q-4691409.html) | © Институт ЯЛИ, ДНЦ РАН, 2014; © Юсупов Х.А., 2014; no open license stated |
-| `tkr` | Tsakhur | [Proverbs 5 (Tsakhur, Institute for Bible Translation) — Bible.is](https://live.bible.is/bible/tkribt/pro/5) | Copyrighted Material; Institute for Bible Translation, no open license stated |
+| `dar` | Dargwa | [Wp/dar/Ислам](https://incubator.wikimedia.org/wiki/Wp/dar/Ислам) | CC BY-SA 4.0 (Wikimedia Incubator) |
 | `yrk` | Nenets | [Гимн Ненецкого автономного округа](https://ru.wikipedia.org/wiki/%D0%93%D0%B8%D0%BC%D0%BD_%D0%9D%D0%B5%D0%BD%D0%B5%D1%86%D0%BA%D0%BE%D0%B3%D0%BE_%D0%B0%D0%B2%D1%82%D0%BE%D0%BD%D0%BE%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE_%D0%BE%D0%BA%D1%80%D1%83%D0%B3%D0%B0) | CC BY-SA 4.0 |
 | `chv` | Chuvash | [Кремль çăлтăрĕсем](https://cv.wikipedia.org/w/index.php?oldid=716328) | CC BY-SA 4.0 |
 | `oss` | Ossetian (Iron) | [Æ](https://os.wikipedia.org/w/index.php?oldid=529701) | CC BY-SA 4.0 |
-| `nog` | Nogai | [Мен – наьсипли инсан - Голос Степи](https://golosstepi.ru/?nationals=men-nasipli-insan) | not stated |
+| `nog` | Nogai | [Wp/nog/Аьйтеке би районы](https://incubator.wikimedia.org/wiki/Wp/nog/Аьйтеке_би_районы) | CC BY-SA 4.0 (Wikimedia Incubator) |
 | `kum` | Kumyk | [Киви](https://incubator.wikimedia.org/w/index.php?title=Wp/kum/Киви&oldid=5620682) | CC BY-SA 4.0 |
 | `bul` | Bulgarian | [Държавна агенция за закрила на детето](https://bg.wikipedia.org/w/index.php?oldid=13057232) | CC BY-SA 4.0 |
 | `krc` | Karachay-Balkar | [Латин алфавит](https://krc.wikipedia.org/w/index.php?oldid=117194) | CC BY-SA 4.0 |
@@ -116,7 +110,7 @@ Each sample in `data/samples.json` is a verbatim excerpt. Wikipedia and Wikimedi
 | `mdf` | Moksha | [Орксофта](https://mdf.wikipedia.org/w/index.php?oldid=59702) | CC BY-SA 4.0 |
 | `myv` | Erzya | [Чевапчичи](https://myv.wikipedia.org/w/index.php?oldid=153961) | CC BY-SA 4.0 |
 
-No sample yet: `cnr` (Montenegrin (Cyrillic)), `agx` (Aghul), `rut` (Rutul).
+No sample, because no openly licensed text was found that the chart routes to the language: `sju` (Ume Sami), `tsd` (Tsakonian), `sva` (Svan), `cnr` (Montenegrin (Cyrillic)), `tab` (Tabasaran), `abq` (Abaza), `agx` (Aghul), `tkr` (Tsakhur), `rut` (Rutul). These languages are on the board but do not appear in Arcade or in the Guess game.
 
 ## Flags
 

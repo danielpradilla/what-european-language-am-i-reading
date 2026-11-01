@@ -172,12 +172,11 @@ Fetch errors are shown in the panel and the previous text is kept.
 
 Each snippet is a verbatim run of whole sentences from a published page, normally 150 to 400 characters, and `route(text).leaf` must equal `lang`; a test enforces this. The app shows each snippet's source link under the text. A language with no snippet is left out of Arcade and stays in every other mode.
 
-`data/samples.json` and `CREDITS.md` are already collected: 103 of the 106 languages have a snippet, each checked against the Python prototype of the engine.
+`data/samples.json` and `CREDITS.md` hold 97 snippets, one for each of 97 languages, each checked against the engine. Every snippet comes from a source whose reuse is allowed:
 
-- 90 come from Wikipedia or Wikimedia Incubator (CC BY-SA 4.0, linked to the exact revision).
-- 13 come from pages without an open licence: Bible translations by the Institute for Bible Translation (Abaza, Tabasaran, Tsakhur), a Dargwa dictionary preface, Swiss federal statistics (Swiss Standard German), Church of Sweden pages (Ume and Lule Sami), the Swedish Election Authority (Southern Sami), Yle (Skolt Sami), svan.ge (Svan), Romano Hangos (Romani), Golos Stepi (Nogai) and tsakonika.online (Tsakonian). They are short quotations with attribution.
-- Two are outside the length range: Tsakonian is a 37-character proverb, the only Tsakonian text with `τσχ` found online, and Dargwa is 587 characters, the shortest window that routes to Dargwa.
-- No snippet: Montenegrin Cyrillic (no running prose with `з́` or `с́` found online), Aghul and Rutul. The Aghul and Rutul texts found online either type the palochka as Latin `I`, digit `1` or Ukrainian `І`, which section 3.3 does not accept, or never have the required letters close together.
+- 96 come from Wikipedia or Wikimedia Incubator (CC BY-SA 4.0, linked to the exact revision or page).
+- Swiss Standard German comes from the Swiss Federal Constitution on fedlex.admin.ch, which is not protected by copyright (Swiss Copyright Act, art. 5).
+- No snippet for nine languages: Ume Sami, Tsakonian, Svan, Montenegrin Cyrillic, Tabasaran, Abaza, Aghul, Tsakhur and Rutul. No openly licensed text was found that the chart routes to them: the required letters (`å` + `ŋ` + `ö đ ŧ`, `τσχ`, `ჷ` + `ჴ`, `з́`/`с́`, `уь`, `шӏ`, a real palochka) do not occur in the open texts available. Earlier drafts used quotations from pages without an open licence (Bible translations, a dictionary preface, church and agency pages); these were removed. The nine languages stay on the board and in every mode that does not need a sample.
 - The Lower Sorbian snippet reaches Lower Sorbian only because it quotes a Czech place name with `ř` (section 3.6).
 
 ## 5. Board
@@ -656,7 +655,7 @@ The last column is the "Must contain" list on the language card: the Y sequences
 | `oci` | occitan | Occitan | Occitan cross | f/g/r ç é |
 | `sqi` | shqip | Albanian | Albania | f/g/r ç ë |
 | `fur` | furlan | Friulian | Friuli | f/g/r ç |
-| `sju` | ubmejensámien giella | Ume Sami | Sami | f/g/r å ŋ ö/đ/ŧ |
+| `sju` | ubmejesámiengiälla (the poster prints "ubmejensámien giella") | Ume Sami | Sami | f/g/r å ŋ ö/đ/ŧ |
 | `smj` | julevsámegiella | Lule Sami | Sami | f/g/r å ŋ |
 | `sma` | åarjelsaemien gïele | Southern Sami | Sami | f/g/r å ï |
 | `nor` | norsk | Norwegian | Norway | f/g/r å æ/ø øy |
