@@ -4,16 +4,16 @@ const imp = (p) => import(`../${p}?v=${V}`);
 const json = (p) => fetch(`${p}?v=${V}`).then((r) => r.json());
 const $ = (s) => document.querySelector(s);
 
-const [engineMod, storageMod, audioMod, panelMod, urlMod, uiMod, commonMod, flagMod, mapMod, layoutMod, exploreMod, replayMod, detectMod, guessMod, europe, chart, flags, samples] = await Promise.all([
-  imp('engine.js'), imp('storage.js'), imp('audio.js'), imp('text-panel.js'), imp('url-text.js'), imp('ui.js'), imp('page-common.js'), imp('flag-svg.js'),
+const [engineMod, storageMod, audioMod, panelMod, urlMod, uiMod, commonMod, flagMod, modelMod, mapMod, layoutMod, exploreMod, replayMod, detectMod, guessMod, europe, modelData, chart, flags, samples] = await Promise.all([
+  imp('engine.js'), imp('storage.js'), imp('audio.js'), imp('text-panel.js'), imp('url-text.js'), imp('ui.js'), imp('page-common.js'), imp('flag-svg.js'), imp('model.js'),
   imp('europe/map.js'), imp('europe/layout.js'), imp('europe/explore.js'), imp('europe/replay.js'), imp('europe/detect.js'), imp('europe/guess.js'),
-  json('src/data/europe.json'), json('src/data/chart.json'), json('assets/flags/flags.json'), json('data/samples.json'),
+  json('src/data/europe.json'), json('src/data/model.json'), json('src/data/chart.json'), json('assets/flags/flags.json'), json('data/samples.json'),
 ]);
 
 const engine = engineMod.createEngine(chart);
 const store = storageMod.createStore('wela.europe.scores'); // the poster's Arcade keeps its own table
 const audio = audioMod.createAudio(store);
-const ctx = { engine, chart, europe, flags, samples, store, audio, codePoints: engineMod.codePoints, lineCol: engineMod.lineCol, isUrl: urlMod.isUrl, menuReturn: false };
+const ctx = { engine, chart, model: modelMod.createModel(modelData), europe, flags, samples, store, audio, codePoints: engineMod.codePoints, lineCol: engineMod.lineCol, isUrl: urlMod.isUrl, menuReturn: false };
 
 const aspect = await commonMod.loadAspects(flags);
 ctx.map = mapMod.createEuropeMap({ svg: $('#board'), mini: $('#minimap'), wrap: $('#board-wrap'), europe, chart, flags, aspect, drawFlag: flagMod.drawFlag, layout: layoutMod, store });

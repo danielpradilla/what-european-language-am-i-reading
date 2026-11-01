@@ -276,6 +276,8 @@ button.stage-card { font: inherit; text-align: left; background: none; border: 0
 }
 @media (pointer: coarse) { .segmented kbd, .steer-actions kbd, .bubble kbd { display: none; } }
 .seq-inline { white-space: nowrap; }
+.q-text { min-width: 0; flex: 1; font-size: 0.95rem; }
+#poster-line { margin: 8px 0 0; }
 @media (max-width: 600px) {
   .coll-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
   #coll-grid .stage-card { padding-left: 50px; }

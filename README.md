@@ -10,6 +10,8 @@ Play it at [danielpradilla.info/projects/what-european-language-am-i-reading](ht
 - **Detect**: paste or type a text, or fetch one from a URL. The snake follows the chart's rules and the letters that decided each turn are highlighted in the text.
 - **Arcade**: steer the snake through real text samples against the clock; a wrong turn shows the letter you missed, with lives, streaks and a local high-score table.
 
+The Europe map page has its own **Detect**: a Naive Bayes language model (`src/data/model.json`, trained with `tools/build_model.py`) picks yes/no questions for your text, the snake answers them, and the languages ruled out fade from the map until one is left.
+
 The chart sorts languages by the letters they use, not by family or geography. Short or unusual texts can take odd routes; the app follows the chart exactly and shows why.
 
 ## Credits
@@ -30,7 +32,7 @@ Open `http://127.0.0.1:8791/`. PHP is only needed for fetching text from URLs (`
 node --test
 ```
 
-The tests check the chart structure, that every language is reachable, the matching rules and that every sample text routes to its own language. `tests/fetch_test.php` checks the URL endpoint against a running server:
+The tests check the language model against a Python fixture, the chart structure, that every language is reachable, the matching rules and that every sample text routes to its own language. `tests/fetch_test.php` checks the URL endpoint against a running server:
 
 ```sh
 php tests/fetch_test.php http://127.0.0.1:8791/api/fetch.php

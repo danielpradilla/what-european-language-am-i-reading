@@ -112,6 +112,14 @@ Each sample in `data/samples.json` is a verbatim excerpt from a source whose reu
 
 No sample, because no openly licensed text was found that the chart routes to the language: `sju` (Ume Sami), `tsd` (Tsakonian), `sva` (Svan), `cnr` (Montenegrin (Cyrillic)), `tab` (Tabasaran), `abq` (Abaza), `agx` (Aghul), `tkr` (Tsakhur), `rut` (Rutul). These languages are on the board but do not appear in Arcade or in the Guess game.
 
+## Language model training text
+
+`src/data/model.json` holds only statistics (gram weights), not text. It was trained on:
+
+- Introductions of random Wikipedia articles in 86 languages, and Wikimedia Incubator test-wiki text: CC BY-SA 4.0 ([Wikimedia Foundation](https://wikimediafoundation.org/)); authors are listed in each page's history.
+- [Tatoeba](https://tatoeba.org/) sentences: CC BY 2.0 FR.
+- Swiss federal legislation (Fedlex), for Swiss Standard German: not protected by copyright (Swiss Copyright Act, art. 5).
+
 ## Flags
 
 Flag images are SVG files from Wikimedia Commons, stored in `assets/flags/`. The chart's own choice of flag is kept for every language (section 5.4 of `SPEC.md`). Yiddish shows the Hebrew chai symbol (חי), as on the chart.

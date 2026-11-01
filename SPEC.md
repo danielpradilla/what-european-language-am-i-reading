@@ -363,6 +363,7 @@ src/
   modes/detect.js
   modes/rounds.js        text round engine used by Arcade
   modes/arcade.js
+  model.js               language model: verdict, Guess Who questions (section 16.5)
   audio.js
   storage.js             collection, settings, high scores
 api/fetch.php
@@ -371,6 +372,8 @@ data/samples.json
 tests/engine.test.js
 tests/chart.test.js
 tests/samples.test.js
+tests/model.test.js
+tools/build_model.py
 CREDITS.md
 README.md              its opening sentence is reused on the projects catalog card
 ```
@@ -389,6 +392,7 @@ Run with `node --test`.
 - Matching: NFD input matches; `r` does not match a decomposed `ř`; `ş` does not match `ș`; Latin `i` does not match Cyrillic `і`; each variant in 3.3 matches, including `гӀ` written with U+04C0.
 - Offsets: hits after astral characters (emoji) still point at the right UTF-16 range.
 - Samples: every entry in `data/samples.json` routes to its `lang`.
+- Model: the JavaScript gram counts, top language and score match `tests/model-fixture.json` (30 texts from Python); at least 90 of the 97 samples are identified (94 today); asked grams belong to the model's list; `occurrences` respects word edges and case.
 - `fetch.php`: rejects `file:`, `ftp:`, `http://127.0.0.1`, `http://[::1]`, `http://169.254.169.254`, and a redirect to a private address.
 
 ### 12.2 Hosting
@@ -497,7 +501,14 @@ The poster sorts languages by letters. This page draws the same 106 languages as
 ### 16.3 Interaction
 
 - Explore: tap or focus a station to open the same language card as on the poster (section 7.1), with its line and branch added, and a link that opens the poster page at that language. Arrow keys move between neighbouring stations along the lines.
-- Detect: the same text panel as the poster page. When a text is routed, the map replays the chart's route step by step: at each letter station of the poster, the languages it rules out fade on the Europe map, with a counter ("Has č? No. 72 languages left"). The destination station lights up at the end. This shows that the letter chart cuts across families and geography.
+- Detect: the same text panel as the poster page (paste, type, URL, Try a sample), but not the poster's rules. It is "Guess Who" on the map: the language model (section 16.5) picks each yes/no question for this text, the snake answers by looking at the text, the matching letters light up, and the languages ruled out fade from the map until one is left.
+  - Questions: `questions(text)` asks at most 12 questions and stops early when one language has 97% of the posterior. Each question is "Does the text contain «g»?" for a gram `g` from the model's list, chosen to give the most information about the languages still in play. A gram's spaces are word edges and are shown in words: ` el ` is "the word «el»", ` qu` "a word starting with «qu»", `ión ` "a word ending in «ión»", `tx` "«tx» inside a word". The answer is the real count in the text: "Yes ×3" or "No".
+  - Playback: the route list in the side panel has one numbered row per question (the gram in words, Yes ×k or No, "N left"). The map chip carries a short line for each step, for example "Has the word «el»? Yes, twice. Romance languages light up; 41 left." A language is ruled out, and its station fades, when its posterior after the questions asked so far is under 1%. Every occurrence of the gram in the text is highlighted (case-insensitive, word edges are whitespace or the ends of the text), with the step number on the first one; hovering or focusing a row scrolls to its hits and outlines them. Clicking a row shows the map as it was after that question.
+  - Final verdict: the questions only narrow the map. After the last question the snake "reads the rest of the text" and names the winner of the full model (all 4,000 grams), with its posterior as confidence ("Spanish · 98% sure"), and the runner-up ("or Catalan (23%)") when the runner-up's posterior is above 10%. The winner's station is lit and pulses, the other stations fade, and Found!, the fanfare and the collection follow. If the full model's winner had already faded, it comes back and a note says "The rest of the text pointed back to X".
+  - Too short: a text with fewer than 15 letters gets "Too short to tell yet" and no verdict. Digits and punctuation alone get the same notices as on the poster page.
+  - Typing follows the poster page (section 6.2): while the player types, the result is provisional ("Leaning to Spanish · keep typing", no Found!, no collection) until a 2 s pause with at least 30 letters, the Finish button, or Enter. Pasted, fetched and sample texts play the questions and are confirmed at the end. With reduced motion the end state appears at once.
+  - The poster's chart: one line under the questions says "The poster's chart would say: Italian" (`engine.route`, with ", the same" when both agree). It is there to compare the chart with the model; the two often differ on short texts, because the chart only looks at a few letters.
+  - Accuracy (held-out Wikipedia text, section 16.5): 90.8% for one sentence, 96.1% for a paragraph. The 97 sample texts: 94 identified. Weak languages, with very little training text: Ume Sami, Tsakhur, Aghul, Montenegrin (Cyrillic), Abaza, Lule Sami and Moksha.
 - Guess the station (game): the app shows a sample text, and the player taps the station where it is spoken. An exact answer scores 100 points; a station on the same line or branch scores 40 and shows "Right family"; anything else scores 0. Each answer then shows the chart's route for that text and the correct station. Ten rounds per game, with round counter, score, streak of exact answers and a local top-10 table (its own storage key, separate from Arcade), using the same game UI components as Arcade. There are no hearts: every round is played.
 
 ### 16.4 Style and page
@@ -508,6 +519,15 @@ The poster sorts languages by letters. This page draws the same 106 languages as
 - A "Map" switch beside Overview/+/− (and in Options, saved in the browser, on by default) hides the coast scenery (land, sea, lakes, sea names, coast line) so only the lines, stations, labels, transfers, Esperanto ring and line tags stay on plain paper.
 - The camera is a CSS transform on an HTML layer around the world-sized SVG (and, on the poster, the snake in its own overlay SVG), and the frame loop runs only while the camera or snake moves, so idle pages do no layout or paint work.
 - Same GA4 tag, credits, hosting and cache-busting rules as the poster page. Glottolog and Natural Earth are credited in `CREDITS.md`.
+
+### 16.5 The language model
+
+- `src/data/model.json` (about 600 KB, 130 KB gzipped) and `src/model.js`. Multinomial Naive Bayes over the character 1- to 4-grams inside words: lowercase, NFC, each whitespace-separated word padded with a space on both sides, grams without a letter or number, or with a digit (Python's `isdigit`), skipped. 106 languages (the chart's leaf codes), 4,000 grams, plus one "any other gram" column per language. Each language keeps its 40 most telling grams; the rest of the list is filled by how well a gram tells one language from the others.
+- Weights are log probabilities quantised to `uint8` over `[lo, hi] = [-16, 0]`, stored base64, row-major `languages × (grams + 1)`. The score of a language is the sum of the gram counts times its log probabilities; the posterior is the softmax of the scores.
+- Training text, about 6 MB: for 86 languages, the introductions of random Wikipedia articles; for the others, Wikimedia Incubator test wikis, Tatoeba sentences and, for Swiss Standard German, Swiss federal legislation. Some languages have only a few kilobytes of text. Sources and licences are in `CREDITS.md`. Only the weights are shipped, not the text.
+- `tools/build_model.py` holds the training and export code (`python tools/build_model.py eval|export CORPUS_DIR`). `eval` splits the corpus 70/30 and reports accuracy on held-out snippets; `export` trains on everything and rewrites `model.json`.
+- Measured accuracy on held-out Wikipedia text: 90.8% for a single sentence, 96.1% for a paragraph, on the quantised model. Python and JavaScript give the same gram counts and scores (`tests/model-fixture.json`, 30 texts, scores within 0.01).
+- The question algorithm (`questions`): with `N` the number of grams in the text and `θ` the model's gram probabilities, the chance that language `L` shows gram `f` in a text of this length is `1 − (1 − min(θ, 0.999))^N`, computed without looking at the text's own count. At each step the question with the largest expected drop in the posterior's entropy is chosen. After each answer the posterior is recomputed from the asked grams' real counts plus one bucket for everything else: `Σ v_f log θ_f + (N − Σ v_f) · log(1 − Σ θ_f)`, so after the questions it is a Naive Bayes on the asked grams only.
 
 ## Appendix A. Stations
 
