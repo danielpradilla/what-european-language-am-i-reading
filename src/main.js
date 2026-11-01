@@ -15,7 +15,7 @@ const store = storageMod.createStore();
 const audio = audioMod.createAudio(store);
 const ctx = { engine, chart, flags, samples, store, audio, codePoints: engineMod.codePoints, lineCol: engineMod.lineCol, isUrl: urlMod.isUrl, menuReturn: false };
 
-const aspect = await commonMod.loadAspects(flags);
+const aspect = await commonMod.loadAspects(flags, Object.keys(chart.leaves));
 ctx.board = boardMod.createBoard({ svg: $('#board'), mini: $('#minimap'), wrap: $('#board-wrap'), chart, flags, aspect, drawFlag: flagMod.drawFlag, store, codePoints: engineMod.codePoints });
 ctx.ui = uiMod.createUi(ctx);
 const { board, ui } = ctx;

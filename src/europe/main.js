@@ -4,19 +4,31 @@ const imp = (p) => import(`../${p}?v=${V}`);
 const json = (p) => fetch(`${p}?v=${V}`).then((r) => r.json());
 const $ = (s) => document.querySelector(s);
 
-const [engineMod, storageMod, audioMod, panelMod, urlMod, uiMod, commonMod, flagMod, modelMod, mapMod, layoutMod, exploreMod, replayMod, detectMod, guessMod, europe, modelData, chart, flags, samples] = await Promise.all([
+const [engineMod, storageMod, audioMod, panelMod, urlMod, uiMod, commonMod, flagMod, modelMod, mapMod, layoutMod, exploreMod, replayMod, detectMod, guessMod, europe, modelData, chart, flags, posterSamples, extra, busSamples] = await Promise.all([
   imp('engine.js'), imp('storage.js'), imp('audio.js'), imp('text-panel.js'), imp('url-text.js'), imp('ui.js'), imp('page-common.js'), imp('flag-svg.js'), imp('model.js'),
   imp('europe/map.js'), imp('europe/layout.js'), imp('europe/explore.js'), imp('europe/replay.js'), imp('europe/detect.js'), imp('europe/guess.js'),
   json('src/data/europe.json'), json('src/data/model.json'), json('src/data/chart.json'), json('assets/flags/flags.json'), json('data/samples.json'),
+  json('src/data/extra.json'), json('data/europe-samples.json'),
 ]);
 
 const engine = engineMod.createEngine(chart);
 const store = storageMod.createStore('wela.europe.scores'); // the poster's Arcade keeps its own table
 const audio = audioMod.createAudio(store);
-const ctx = { engine, chart, model: modelMod.createModel(modelData), europe, flags, samples, store, audio, codePoints: engineMod.codePoints, lineCol: engineMod.lineCol, isUrl: urlMod.isUrl, menuReturn: false };
+// The Europe page's own lookup: the poster's 106 languages plus the regional bus languages. The shared chart is never changed.
+const leaves = { ...chart.leaves, ...extra.leaves };
+const nm = (c) => leaves[c].label.split(' / ')[0];
+/** Bus route of a regional language: its metro ends say whether it runs between two main languages or off one. null for metro stations. */
+const busInfo = (c) => {
+  const st = europe.stations[c];
+  if (!st?.bus) return null;
+  const route = europe.buses[st.bus];
+  const ends = [...new Set(route.segments.flatMap((s) => [s.from, s.to]).filter((k) => !europe.stations[k].bus))];
+  return { id: st.bus, route, ends, text: ends.length > 1 ? `bus between ${ends.map(nm).join(' and ')}` : `bus from ${nm(ends[0])}`, stop: ends.length > 1 ? `bus stop between ${ends.map(nm).join(' and ')}` : `bus stop off ${nm(ends[0])}` };
+};
+const ctx = { engine, chart, leaves, busInfo, model: modelMod.createModel(modelData), europe, flags, samples: [...posterSamples, ...busSamples], store, audio, codePoints: engineMod.codePoints, lineCol: engineMod.lineCol, isUrl: urlMod.isUrl, menuReturn: false };
 
 const aspect = await commonMod.loadAspects(flags);
-ctx.map = mapMod.createEuropeMap({ svg: $('#board'), mini: $('#minimap'), wrap: $('#board-wrap'), europe, chart, flags, aspect, drawFlag: flagMod.drawFlag, layout: layoutMod, store });
+ctx.map = mapMod.createEuropeMap({ svg: $('#board'), mini: $('#minimap'), wrap: $('#board-wrap'), europe, leaves, flags, aspect, drawFlag: flagMod.drawFlag, layout: layoutMod, store });
 ctx.ui = uiMod.createUi(ctx);
 const { map, ui } = ctx;
 
@@ -39,6 +51,7 @@ ctx.loadText = (text, m = 'detect') => { if (mode !== m) setMode(m); ctx.setMeta
 // ---------- modes ----------
 const replay = replayMod.createReplay(ctx);
 const explore = exploreMod.createExplore(ctx);
+ctx.cardExtra = explore.cardExtra;
 ctx.openCard = (code) => ui.showCard(code, explore.cardExtra(code));
 const modes = { explore, detect: detectMod.createDetect(ctx, replay), guess: guessMod.createGuess(ctx, replay) };
 const app = $('#app');

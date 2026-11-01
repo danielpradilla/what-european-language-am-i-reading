@@ -59,24 +59,27 @@ export function createModel(m) {
     return { v, other, grams };
   }
 
+  // log prior per language (the regional bus languages carry a small penalty so a close call goes to the main language)
+  const prior = m.prior ?? new Array(L).fill(0);
   const scoreOf = ({ v, other }) => {
     const s = new Array(L);
     for (let l = 0; l < L; l++) {
       const row = l * W;
-      let t = other * logt[row + F];
+      let t = prior[l] + other * logt[row + F];
       for (let f = 0; f < F; f++) if (v[f]) t += v[f] * logt[row + f];
       s[l] = t;
     }
     return s;
   };
 
-  /** Full verdict: every language with its posterior, best first. */
-  function verdict(text) {
+  /** Full verdict: every language with its posterior, best first. `only` (a Set of codes) restricts and renormalises the ranking. */
+  function verdict(text, { only } = {}) {
     const x = featurize(text);
     if (!x.grams) return { ranking: [], grams: 0 };
     const score = scoreOf(x);
-    const p = SOFTMAX(score);
-    const ranking = langs.map((lang, i) => ({ lang, p: p[i], score: score[i] })).sort((a, b) => b.p - a.p);
+    const idx = langs.map((_, i) => i).filter((i) => !only || only.has(langs[i]));
+    const p = SOFTMAX(idx.map((i) => score[i]));
+    const ranking = idx.map((i, k) => ({ lang: langs[i], p: p[k], score: score[i] })).sort((a, b) => b.p - a.p);
     return { ranking, grams: x.grams };
   }
 
@@ -112,7 +115,7 @@ export function createModel(m) {
     // P(gram present | language, N grams), stored gram-major so one gram's languages sit together
     const pp = new Float32Array(F * L);
     for (let l = 0; l < L; l++) for (let f = 0; f < F; f++) pp[f * L + l] = 1 - Math.pow(1 - Math.min(Math.exp(logt[l * W + f]), 0.999), N);
-    let post = new Array(L).fill(1 / L);
+    let post = SOFTMAX(prior);
     const asked = [], askedSet = new Set(), steps = [];
     const py = new Float64Array(L), pn = new Float64Array(L);
     for (let q = 0; q < MAX_QUESTIONS; q++) {
@@ -140,7 +143,7 @@ export function createModel(m) {
       for (let l = 0; l < L; l++) {
         let mass = 0, t = 0;
         for (const f of asked) { const lt = logt[l * W + f]; mass += Math.exp(lt); t += x.v[f] * lt; }
-        lp[l] = t + Math.log(Math.max(1 - mass, 1e-12)) * (N - seen);
+        lp[l] = prior[l] + t + Math.log(Math.max(1 - mass, 1e-12)) * (N - seen);
       }
       post = SOFTMAX(lp);
       // Guess Who: a language that has been ruled out stays out, so the count of languages left only goes down.

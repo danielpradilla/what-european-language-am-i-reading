@@ -4,6 +4,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 
 export function createUi(ctx) {
   const { engine, chart, flags, samples, store, audio } = ctx;
+  const leaves = ctx.leaves ?? chart.leaves; // the Europe page adds its bus languages; the poster's chart stays untouched
   const reduced = () => store.settings.reduced;
   let lastFound = null;
 
@@ -33,13 +34,13 @@ export function createUi(ctx) {
   const clearNotice = (key) => notices.querySelectorAll(`[data-key="${key}"]`).forEach((n) => n.remove());
 
   // ---------- flags and names ----------
-  const leafInfo = (code) => chart.leaves[code];
+  const leafInfo = (code) => leaves[code];
   const name = (code) => leafInfo(code).english;
   function flagHtml(code) {
     const info = flags.leaves[code] ?? { files: [], layout: 'single' };
     const img = (f) => `<img src="assets/flags/${f}" alt="" loading="lazy">`;
-    const inner = info.layout === 'chai' ? '<span class="chai">חי</span>' : info.files.map(img).join('');
-    return `<span class="flag flag-${info.layout}" role="img" aria-label="Flag of ${esc(leafInfo(code).flagNote)}">${inner}</span>`;
+    const inner = info.layout === 'chai' || info.layout === 'text' ? `<span class="chai">${esc(info.text ?? 'חי')}</span>` : info.files.map(img).join('');
+    return `<span class="flag flag-${info.layout}" role="img" aria-label="${leafInfo(code).flagNote ? `Flag of ${esc(leafInfo(code).flagNote)}` : `Flag for ${esc(leafInfo(code).english)}`}">${inner}</span>`;
   }
 
   // ---------- dialogs ----------
@@ -59,7 +60,8 @@ export function createUi(ctx) {
   /** extra: html shown under the heading (the Europe map adds line, branch and a poster link). */
   function showCard(code, extra = '') {
     const lf = leafInfo(code);
-    const paths = engine.pathsTo(code);
+    const bus = !chart.leaves[code]; // a regional bus language: no place on the poster, so no routes
+    const paths = bus ? [] : engine.pathsTo(code);
     const sample = samples.find((s) => s.lang === code);
     const routeHtml = paths.map((p, i) => {
       const yes = p.filter((s) => s.answer), no = p.filter((s) => !s.answer);
@@ -70,27 +72,28 @@ export function createUi(ctx) {
         <p class="hint">${p.length} steps. “Must contain” means at least one letter from each group.</p>
       </div>`;
     }).join('');
-    const min = engine.minimalText(code);
+    const min = bus ? '' : engine.minimalText(code);
     $('#dlg-card-body').innerHTML = `
       <div class="card-top">
         <div class="card-flag">${flagHtml(code)}</div>
         <div>
           <h2>${esc(lf.label)}</h2>
-          <p class="muted">${esc(lf.english)} · <span class="num">${esc(code)}</span> · flag of ${esc(lf.flagNote)}</p>
+          <p class="muted">${esc(lf.english)} · <span class="num">${esc(code)}</span>${lf.flagNote ? ` · flag of ${esc(lf.flagNote)}` : ''}</p>
         </div>
       </div>
-      ${extra}
-      ${routeHtml}
-      ${NOTES[code] ? `<div class="note note-warning"><strong>Chart quirk</strong><span>${NOTES[code]}</span></div>` : ''}
-      <div class="card-min">
+      ${extra || ctx.cardExtra?.(code) || ''}
+      ${bus ? `<p>${esc(lf.note)}</p><div class="note note-info"><span>Not on the poster: a regional bus stop on the Europe map.</span></div>` : routeHtml}
+      ${!bus && NOTES[code] ? `<div class="note note-warning"><strong>Chart quirk</strong><span>${NOTES[code]}</span></div>` : ''}
+      ${bus ? '' : `<div class="card-min">
         <span class="label">Shortest text that reaches it</span>
         <p><code class="min-text">${esc(min)}</code></p>
         <button class="btn btn-small btn-primary" type="button" id="card-load-min">Load it in Detect</button>
-      </div>
+      </div>`}
       ${sample ? `<div class="card-sample"><span class="label">Sample</span><p class="sample-text" lang="${esc(code)}">${esc(sample.text.length > 260 ? `${sample.text.slice(0, 260)}…` : sample.text)}</p>
         <p class="hint"><a href="${esc(sample.source)}" target="_blank" rel="noopener">${esc(sample.title || sample.source)}</a> · ${esc(sample.license)}</p>
         <button class="btn btn-small" type="button" id="card-load-sample">Try this sample</button></div>` : '<p class="hint">No sample text for this language.</p>'}`;
-    $('#card-load-min').onclick = () => { $('#dlg-card').close(); $('#dlg-collection').close(); ctx.loadText(min, 'detect'); };
+    const lm = $('#card-load-min');
+    if (lm) lm.onclick = () => { $('#dlg-card').close(); $('#dlg-collection').close(); ctx.loadText(min, 'detect'); };
     const ls = $('#card-load-sample');
     if (ls) ls.onclick = () => { $('#dlg-card').close(); $('#dlg-collection').close(); ctx.loadText(sample.text, 'detect'); };
     open($('#dlg-card'));
@@ -98,11 +101,12 @@ export function createUi(ctx) {
   }
 
   // ---------- collection (SPEC 7.2) ----------
-  const codes = Object.keys(chart.leaves);
-  function updateCount() { $('#coll-count').textContent = `${store.count()}/${codes.length}`; }
+  const codes = Object.keys(leaves);
+  const have = () => codes.filter((c) => store.collection()[c]).length; // the collection is shared with the poster, which has fewer languages
+  function updateCount() { $('#coll-count').textContent = `${have()}/${codes.length}`; }
   function renderCollection() {
     const coll = store.collection();
-    $('#coll-sub').textContent = `${store.count()} of ${codes.length} flags reached in any mode.`;
+    $('#coll-sub').textContent = `${have()} of ${codes.length} flags reached in any mode.`;
     $('#coll-grid').innerHTML = codes.map((c, i) => {
       const got = coll[c];
       if (!got) return `<div class="stage-card is-locked" aria-disabled="true"><span class="stamp">${i + 1}</span><h3>Locked</h3><span class="label">Not found yet</span></div>`;
@@ -122,7 +126,7 @@ export function createUi(ctx) {
     lastFound = code;
     updateCount();
     if (isNew) {
-      toast(leafInfo(code).label, `${leafInfo(code).english} · ${store.count()} of ${codes.length} found`);
+      toast(leafInfo(code).label, `${leafInfo(code).english} · ${have()} of ${codes.length} found`);
       ctx.refreshFog?.();
     }
     return isNew;

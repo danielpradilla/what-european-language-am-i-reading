@@ -9,6 +9,7 @@ import numpy as np
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PER_LANG, GLOBAL = 40, 4000   # clues kept per language; size of the shared gram list
+BUS_PRIOR = 0.1               # prior of a regional (bus) language relative to a poster language
 LO, HI = -16.0, 0.0           # log-probability range of the uint8 weights
 SPLIT = re.compile(r'(?<=[.!?։])\s+')
 LETTER = re.compile(r'\w', re.U)
@@ -121,8 +122,12 @@ if __name__ == '__main__':
     else:
         langs, vocab, vi, logt = fit(counts_of(read_corpus(corpus)))
         q, _ = quantize(logt)
-        out = {'about': 'Multinomial Naive Bayes over in-word character 1-4-grams (lowercase, NFC, each word padded with spaces; grams with a digit or no letter are skipped). Weights: log probabilities, uint8-quantised over [lo, hi], row-major langs x (grams + 1); the last column is every gram not in the list.',
-               'lo': LO, 'hi': HI, 'langs': langs, 'grams': vocab,
+        # Regional (bus) languages are much rarer in the wild than the poster's languages: prior 0.1 relative to them.
+        # Measured: Spanish chat no longer reads as Asturian; held-out accuracy on the bus languages drops 1.5 points.
+        bus = set(json.load(open(f'{REPO}/src/data/extra.json', encoding='utf-8'))['leaves'])
+        prior = [round(math.log(BUS_PRIOR), 4) if l in bus else 0 for l in langs]
+        out = {'about': 'Multinomial Naive Bayes over in-word character 1-4-grams (lowercase, NFC, each word padded with spaces; grams with a digit or no letter are skipped). Weights: log probabilities, uint8-quantised over [lo, hi], row-major langs x (grams + 1); the last column is every gram not in the list. prior: log prior per language, added to the score.',
+               'lo': LO, 'hi': HI, 'langs': langs, 'grams': vocab, 'prior': prior,
                'weights': base64.b64encode(q.tobytes()).decode()}
         dest = f'{REPO}/src/data/model.json'
         json.dump(out, open(dest, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))

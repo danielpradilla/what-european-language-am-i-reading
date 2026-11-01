@@ -21,9 +21,12 @@ export function createDetect(ctx) {
   const sure = (p) => (p > 0.995 ? 'over 99%' : `${Math.round(p * 100)}%`);
   let modelP = null; // loaded on first use, not at page load
   const getModel = () => (modelP ??= import(`../model.js?v=${V}`).then((m) => m.loadModel(new URL(`../data/model.json?v=${V}`, import.meta.url))).catch((e) => { modelP = null; throw e; }));
+  let extraP = null; // names of the Europe map's bus languages, only needed when the reading is one of them
+  const getExtra = () => (extraP ??= fetch(new URL(`../data/extra.json?v=${V}`, import.meta.url)).then((r) => r.json()).catch((e) => { extraP = null; throw e; }));
   let seq = 0; // bumped whenever a pending reading goes stale
   let reading = null; // { win } while a detour is shown
   const lc = (text, off) => lineCol(text, off);
+  const only = new Set(Object.keys(chart.leaves)); // the model also knows the Europe map's bus languages; the poster must not detour to them
   const where = (text, off) => { const p = lc(text, off); return `line ${p.line}, col ${p.col}`; };
 
   // "Why not…?" language list
@@ -119,15 +122,25 @@ export function createDetect(ctx) {
     if (enough) { try { m = await getModel(); } catch { /* offline: the chart's answer stands */ } }
     if (my !== seq || !active) return;
     const say = (html) => { readOut.innerHTML = `<div class="note note-info">${html}</div>`; };
-    const top = m?.verdict(text).ranking[0];
+    const top = m?.verdict(text, { only }).ranking[0];
     if (!enough) say('<strong>Too short for me to check.</strong>');
     if (!top) return finish(chartCode, celebrate);
+    // The full model may read a regional language the poster leaves out: name it and point to the Europe map, no detour.
+    const full = m.verdict(text).ranking[0];
+    if (!only.has(full.lang) && full.p >= SURE) {
+      const x = (await getExtra().catch(() => null))?.leaves[full.lang];
+      if (my !== seq || !active) return;
+      if (x) {
+        say(`<strong>The chart says ${ui.esc(name(chartCode))}. My reading: ${ui.esc(x.english)} (${ui.esc(x.label)}, ${sure(full.p)} sure), a regional language that is not on this poster.</strong> It is a bus stop on the <a href="europe.html#lang=${encodeURIComponent(full.lang)}">Europe map</a>.`);
+        return finish(chartCode, celebrate);
+      }
+    }
     if (top.lang === chartCode) {
       say(`<strong>The chart and my reading agree: ${ui.esc(name(chartCode))} (${sure(top.p)} sure)</strong>`);
       return finish(chartCode, celebrate);
     }
     if (top.p < SURE) {
-      const [a, b] = m.verdict(text).ranking;
+      const [a, b] = m.verdict(text, { only }).ranking;
       say(`<strong>The chart says ${ui.esc(name(chartCode))}. My reading is unsure: ${ui.esc(name(a.lang))} ${Math.round(a.p * 100)}%, ${ui.esc(name(b.lang))} ${Math.round(b.p * 100)}%.</strong>`);
       return finish(chartCode, celebrate);
     }

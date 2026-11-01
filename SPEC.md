@@ -215,7 +215,7 @@ The camera follows the head with easing. `O` or the overview button fits the who
 
 ### 5.4 Flags
 
-Flags are local SVG files in `assets/flags/`, mostly from Wikimedia Commons, with sources and licences in `CREDITS.md`. Two terminals use composites, drawn the way the chart draws them: the Bosnian/Croatian/Serbian/Montenegrin terminal is a 2×2 tile, and Nogai is three regional flags. Yiddish shows the chai symbol (חי) instead of a flag, as on the chart. Appendix B lists the flag for each terminal.
+Flags are local SVG files in `assets/flags/`, mostly from Wikimedia Commons, with sources and licences in `CREDITS.md`. Two terminals use composites, drawn the way the chart draws them: the Bosnian/Croatian/Serbian/Montenegrin terminal is a 2×2 tile, and Nogai is three regional flags. Yiddish shows the chai symbol (חי) instead of a flag, as on the chart. Ladino, which has no agreed flag, shows a letter tile in the same way (the Hebrew lamed, ל, `layout: "text"` with a `text` field in `flags.json`). Appendix B lists the flag for each terminal.
 
 ### 5.5 Fonts
 
@@ -503,14 +503,14 @@ The poster sorts languages by letters. This page draws the same 106 languages as
 ### 16.3 Interaction
 
 - Explore: tap or focus a station to open the same language card as on the poster (section 7.1), with its line and branch added, and a link that opens the poster page at that language. Arrow keys move between neighbouring stations along the lines.
-- Detect: the same text panel as the poster page (paste, type, URL, Try a sample), but not the poster's rules. It is "Guess Who" on the map: the language model (section 16.5) picks each yes/no question for this text, the snake answers by looking at the text, the matching letters light up, and the languages ruled out fade from the map until one is left.
+- Detect (full model of 138 languages, bus languages included; section 16.6): the same text panel as the poster page (paste, type, URL, Try a sample), but not the poster's rules. It is "Guess Who" on the map: the language model (section 16.5) picks each yes/no question for this text, the snake answers by looking at the text, the matching letters light up, and the languages ruled out fade from the map until one is left.
   - Questions: `questions(text)` asks at most 12 questions and stops early when one language has 97% of the posterior. Each question is "Does the text contain «g»?" for a gram `g` from the model's list, chosen to give the most information about the languages still in play. A gram's spaces are word edges and are shown in words: ` el ` is "the word «el»", ` qu` "a word starting with «qu»", `ión ` "a word ending in «ión»", `tx` "«tx» inside a word". The answer is the real count in the text: "Yes ×3" or "No".
   - Playback: the route list in the side panel has one numbered row per question (the gram in words, Yes ×k or No, "N left"). The map chip carries a short line for each step, for example "Has the word «el»? Yes, twice. Romance languages light up; 41 left." A language is ruled out, and its station fades, when its posterior after the questions asked so far is under 1%. Every occurrence of the gram in the text is highlighted (case-insensitive, word edges are whitespace or the ends of the text), with the step number on the first one; hovering or focusing a row scrolls to its hits and outlines them. Clicking a row shows the map as it was after that question.
   - Final verdict: the questions only narrow the map. After the last question the snake "reads the rest of the text" and names the winner of the full model (all 4,000 grams), with its posterior as confidence ("Spanish · 98% sure"), and the runner-up ("or Catalan (23%)") when the runner-up's posterior is above 10%. The winner's station is lit and pulses, the other stations fade, and Found!, the fanfare and the collection follow. If the full model's winner had already faded, it comes back and a note says "The rest of the text pointed back to X".
   - Too short: a text with fewer than 15 letters gets "Too short to tell yet" and no verdict. Digits and punctuation alone get the same notices as on the poster page.
   - Typing follows the poster page (section 6.2): while the player types, the result is provisional ("Leaning to Spanish · keep typing", no Found!, no collection) until a 2 s pause with at least 30 letters, the Finish button, or Enter. Pasted, fetched and sample texts play the questions and are confirmed at the end. With reduced motion the end state appears at once.
   - The poster's chart: one line under the questions says "The poster's chart would say: Italian" (`engine.route`, with ", the same" when both agree). It is there to compare the chart with the model; the two often differ on short texts, because the chart only looks at a few letters.
-  - Accuracy (held-out Wikipedia text, section 16.5): 90.8% for one sentence, 96.1% for a paragraph. The 97 sample texts: 94 identified. Weak languages, with very little training text: Ume Sami, Tsakhur, Aghul, Montenegrin (Cyrillic), Abaza, Lule Sami and Moksha.
+  - Accuracy (held-out Wikipedia text, section 16.5): poster languages 92.7% for one sentence and 96.2% for a paragraph; bus languages 91.2% and 98.5%. The 97 sample texts: 94 identified; the 32 Europe samples: all identified. Weak languages, with very little training text: Ume Sami, Tsakhur, Aghul, Montenegrin (Cyrillic), Abaza, Svan and Tabasaran.
 - Guess the station (game): the app shows a sample text, and the player taps the station where it is spoken. An exact answer scores 100 points; a station on the same line or branch scores 40 and shows "Right family"; anything else scores 0. Each answer then shows the chart's route for that text and the correct station. Ten rounds per game, with round counter, score, streak of exact answers and a local top-10 table (its own storage key, separate from Arcade), using the same game UI components as Arcade. There are no hearts: every round is played.
 
 ### 16.4 Style and page
@@ -525,12 +525,52 @@ The poster sorts languages by letters. This page draws the same 106 languages as
 
 ### 16.5 The language model
 
-- `src/data/model.json` (about 600 KB, 130 KB gzipped) and `src/model.js`. Multinomial Naive Bayes over the character 1- to 4-grams inside words: lowercase, NFC, each whitespace-separated word padded with a space on both sides, grams without a letter or number, or with a digit (Python's `isdigit`), skipped. 106 languages (the chart's leaf codes), 4,000 grams, plus one "any other gram" column per language. Each language keeps its 40 most telling grams; the rest of the list is filled by how well a gram tells one language from the others.
+- `src/data/model.json` (about 770 KB, 195 KB gzipped) and `src/model.js`. Multinomial Naive Bayes over the character 1- to 4-grams inside words: lowercase, NFC, each whitespace-separated word padded with a space on both sides, grams without a letter or number, or with a digit (Python's `isdigit`), skipped. 138 languages (the chart's 106 leaf codes and the 32 regional bus languages of section 16.6), 4,000 grams, plus one "any other gram" column per language. `prior` holds a log prior per language: 0 for the poster's languages and ln 0.1 for the bus languages, so that a close call between a main language and a regional one goes to the main one. `scoreOf` and `questions` add it; `clues` compares grams only and leaves it out. Each language keeps its 40 most telling grams; the rest of the list is filled by how well a gram tells one language from the others.
 - Weights are log probabilities quantised to `uint8` over `[lo, hi] = [-16, 0]`, stored base64, row-major `languages × (grams + 1)`. The score of a language is the sum of the gram counts times its log probabilities; the posterior is the softmax of the scores.
 - Training text, about 6 MB: for 86 languages, the introductions of random Wikipedia articles; for the others, Wikimedia Incubator test wikis, Tatoeba sentences and, for Swiss Standard German, Swiss federal legislation. Some languages have only a few kilobytes of text. Sources and licences are in `CREDITS.md`. Only the weights are shipped, not the text.
 - `tools/build_model.py` holds the training and export code (`python tools/build_model.py eval|export CORPUS_DIR`). `eval` splits the corpus 70/30 and reports accuracy on held-out snippets; `export` trains on everything and rewrites `model.json`.
-- Measured accuracy on held-out Wikipedia text: 90.8% for a single sentence, 96.1% for a paragraph, on the quantised model. Python and JavaScript give the same gram counts and scores (`tests/model-fixture.json`, 30 texts, scores within 0.01).
+- Measured accuracy on held-out Wikipedia text (30% of the training text held out, quantised 138-language model with the prior): the poster's 106 languages 92.7% for a single sentence and 96.2% for a paragraph; the 32 bus languages 91.2% and 98.5%. The prior costs the bus languages 1.5 points on sentences and moves the Spanish test sentence from Asturian back to Spanish. The training text for Meadow Mari and Karelian was filtered to lines in those languages (the Wikipedia intros included Russian and Tatar passages). The poster's 97 samples are identified 94/97, and all 32 Europe samples are identified. Python and JavaScript give the same gram counts and scores (`tests/model-fixture.json`, 30 texts, scores within 0.01).
 - The question algorithm (`questions`): with `N` the number of grams in the text and `θ` the model's gram probabilities, the chance that language `L` shows gram `f` in a text of this length is `1 − (1 − min(θ, 0.999))^N`, computed without looking at the text's own count. At each step the question with the largest expected drop in the posterior's entropy is chosen. After each answer the posterior is recomputed from the asked grams' real counts plus one bucket for everything else: `Σ v_f log θ_f + (N − Σ v_f) · log(1 − Σ θ_f)`, so after the questions it is a Naive Bayes on the asked grams only.
+
+### 16.6 Bus routes: regional languages
+
+- **Metro and bus.** The metro lines are the poster's 106 languages, unchanged and identical to the poster. The bus routes add 32 regional languages and language varieties that the poster leaves out. They exist only on the Europe page: the poster page, its chart, its engine, its 106-flag collection and its samples do not change.
+- **What a route means.** A bus route starts at the metro station it connects to (for example "bus from italiano"). When it ends at a second metro station, the regional languages on it sit between those two main languages, because of shared ancestry or a transitional area ("bus between français and occitan"). A route does not say that a regional language descends from, or is a dialect of, either station: most of them are sister languages of the standard. Whether a variety counts as a language or a dialect is not decided by the map.
+- **Look.** Bus routes are thinner than metro lines, in the colour of the family line of their first station, with a dashed centre line, and they are drawn under the metro lines. A bus stop is a smaller rounded flag with a "BUS" plate and a ring in the route colour. Labels use the same font. The legend in Explore has a "Bus routes" group with one row per route; tapping a row or a route highlights it and says what it connects. The minimap shows bus stops as small dots. Arrow-key travel follows bus segments like metro segments.
+- **Stations.** Bus stops are stations in `europe.json` with `bus: <route id>` instead of a `line`, a grid position and approximate `latlon` (the centre of the area where the language is spoken, common knowledge, not Glottolog). Routes are in `buses`: `{ name, line, segments: [{ from, to, pts }] }`, where `line` is the metro line whose colour the route borrows. Names, English names, notes and parents are in `src/data/extra.json` (`leaves[code] = { label, english, parent, wiki, note }`). `parent` is the metro station the route starts at. The Europe page merges `extra.leaves` into a lookup of its own; `chart.json` is never changed.
+- **Ladino.** It is not tied to one region. Its route is a long spur that leaves español, runs along the south of the map and ends at Thessaloniki, the main home of the Sephardic community after 1492.
+- **Cards.** The card of a bus language shows its flag, native name, English name, code, the note from `extra.json`, its route ("Bus between … " or "Bus from …"), "Not on the poster: a regional bus stop on the Europe map.", and its sample with the source when it has one. It has no poster route, no "shortest text" and no link to the poster. The Explore hint about the nearest neighbour on the poster is left out for bus stops.
+- **Counts.** The Europe page shows 106 + 32 = 138 languages. Its collection includes the bus languages and counts out of 138; the poster's collection still counts out of 106. The collection is stored in one place for both pages, so each page counts only its own codes.
+- **Guess.** The pool is `data/samples.json` plus `data/europe-samples.json` (one verbatim run of sentences per bus language, 150 to 400 characters, from its Wikipedia or the Wikimedia Incubator, CC BY-SA 4.0). A bus stop counts as being on its route's family line for "Right family". The poster's route is shown after the answer, as for the other texts.
+- **Detect.** The Europe page uses the full model (all the languages) for the questions and the verdict. A bus language reads "Found Venetian · 93% sure (bus stop off italiano)". The line "The poster's chart would say: …" stays.
+- **The poster restriction.** `verdict(text, { only })` ranks only the languages in the set `only` and renormalises the probabilities. The poster's detour (section 6.2) passes the 106 chart codes, so it can never jump to a flag that is not on the poster, even though the shared model also knows the bus languages. When the full model reads a bus language with at least 60% confidence, the poster's Detect does not detour: it says "The chart says Italian. My reading: Venetian (vèneto, 99% sure), a regional language that is not on this poster" and links to that bus stop on the Europe map (`europe.html#lang=vec`).
+
+| Route | Stops (a metro code at each end where the route joins stations) |
+|---|---|
+| Astur-Leonese | por → mwl → ast → spa |
+| Aragonese | spa → arg → cat |
+| Extremaduran | spa → ext |
+| Ladino | spa → lad |
+| Gallo-Italic | oci → lij → pms → lmo → ita |
+| Venetian | ita → vec |
+| Southern Italian | ita → nap → scn |
+| Arpitan | fra → frp → oci |
+| Oïl | fra → pcd → wln; fra → nrf |
+| Low German | nld → nds → deu |
+| Limburgish and Ripuarian | nld → lim → ksh → deu |
+| Saterland Frisian | frr → stq |
+| Zeelandic and West Flemish | nld → zea → vls |
+| Alemannic | de-CH → gsw → deu |
+| Bavarian | deu → bar |
+| Scots | eng → sco |
+| Brittonic | cym → cor → bre |
+| Goidelic | gle → glv → gla |
+| Silesian | pol → szl → ces |
+| Rusyn | ukr → rue → slk |
+| Latgalian | lav → ltg |
+| Samogitian | lit → sgs |
+| Võro | est → vro |
+| Meänkieli | fin → fit → swe |
 
 ## Appendix A. Stations
 

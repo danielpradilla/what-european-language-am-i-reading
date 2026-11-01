@@ -1,4 +1,4 @@
-// A flag drawn into an SVG <g> centred on (0,0): one tile, 2x2 tiles, three regional flags, or the Yiddish chai.
+// A flag drawn into an SVG <g> centred on (0,0): one tile, 2x2 tiles, three regional flags, or a letter tile (the Yiddish chai, the Ladino lamed).
 const NS = 'http://www.w3.org/2000/svg';
 const el = (tag, attrs, parent) => {
   const e = document.createElementNS(NS, tag);
@@ -16,9 +16,9 @@ export function drawFlag(g, info, s, aspect) {
     const iw = a > tw / th ? th * a : tw, ih = a > tw / th ? th : tw / a;
     el('image', { href: `assets/flags/${file}`, x: (tw - iw) / 2, y: (th - ih) / 2, width: iw, height: ih, preserveAspectRatio: 'none' }, n);
   };
-  if (info.layout === 'chai') {
+  if (info.layout === 'chai' || info.layout === 'text') { // a letter tile (Yiddish chai, Ladino lamed) instead of a flag
     el('rect', { x: -h, y: -h, width: s, height: s, fill: '#fffaee' }, g);
-    el('text', { x: 0, y: 0, class: 'chai', 'text-anchor': 'middle', 'font-size': s * 0.6, 'dominant-baseline': 'central' }, g).textContent = 'חי';
+    el('text', { x: 0, y: 0, class: 'chai', 'text-anchor': 'middle', 'font-size': s * 0.6, 'dominant-baseline': 'central' }, g).textContent = info.text ?? 'חי';
   } else if (info.layout === '2x2') {
     info.files.forEach((f, i) => tile(f, -h + (i % 2) * h, -h + Math.floor(i / 2) * h, h, h));
   } else if (info.layout === '3up') {

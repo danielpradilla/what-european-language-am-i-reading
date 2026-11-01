@@ -27,9 +27,9 @@ const SINGLES = {
 const SCRIPTS = { Cyrillic: /\p{Script=Cyrillic}/u, Greek: /\p{Script=Greek}/u, Georgian: /\p{Script=Georgian}/u, Armenian: /\p{Script=Armenian}/u, Hebrew: /\p{Script=Hebrew}/u };
 
 export function createExplore(ctx) {
-  const { chart, europe, map, ui, store } = ctx;
+  const { chart, europe, map, ui, store, leaves, busInfo } = ctx;
   const { esc } = ui;
-  const S = europe.stations, L = europe.lines;
+  const S = europe.stations, L = europe.lines, B = europe.buses;
   const intro = $('#line-intro');
   const seen = new Set();
   let introTimer = 0;
@@ -37,11 +37,12 @@ export function createExplore(ctx) {
   let active = false;
 
   const scriptOf = (c) => {
-    const native = chart.leaves[c].label.split(' / ')[1] ?? chart.leaves[c].label;
+    const native = leaves[c].label.split(' / ')[1] ?? leaves[c].label;
     return Object.entries(SCRIPTS).find(([, re]) => re.test(native))?.[0] ?? 'Latin';
   };
   const cd = (a, b) => Math.hypot(chart.leaves[a].at[0] - chart.leaves[b].at[0], chart.leaves[a].at[1] - chart.leaves[b].at[1]);
-  const posterNeighbour = (c) => map.codes.filter((k) => k !== c).sort((a, b) => cd(c, a) - cd(c, b))[0];
+  const metro = map.codes.filter((k) => !S[k].bus); // the poster's 106; bus stops have no place on it
+  const posterNeighbour = (c) => metro.filter((k) => k !== c).sort((a, b) => cd(c, a) - cd(c, b))[0];
   const members = (id) => map.codes.filter((c) => S[c].line === id);
 
   /** Where the letter chart and the family map agree or disagree for one line. */
@@ -57,7 +58,16 @@ export function createExplore(ctx) {
     return parts.join(' ');
   }
 
+  const cap = (t) => t[0].toUpperCase() + t.slice(1);
+  const stopsOf = (bid) => [...new Set(B[bid].segments.flatMap((s) => [s.from, s.to]).filter((k) => S[k].bus))];
+  const busIntroHtml = (bid) => {
+    const b = B[bid], stops = stopsOf(bid), info = busInfo(stops[0]);
+    return `<div class="li-head"><span class="swatch swatch-bus" style="--c:${L[b.line].colour}"></span><b>${esc(b.name)} bus</b><span class="muted">${esc(cap(info.text))} · ${stops.length} regional ${stops.length === 1 ? 'language' : 'languages'}</span><button type="button" class="btn btn-small btn-quiet li-x" aria-label="Close">Close</button></div>
+      <p>${stops.map((c) => esc(leaves[c].english)).join(', ')}.</p>
+      <p class="hint">Metro: the poster's 106 languages. Bus: regional languages that are not on the poster. A bus between two stations marks a language that sits between two main ones; it does not mean it comes from either.</p>`;
+  };
   function lineIntroHtml(id) {
+    if (id.startsWith('bus:')) return busIntroHtml(id.slice(4));
     const line = L[id];
     const branches = [...new Set(members(id).map((c) => S[c].branch))];
     return `<div class="li-head"><span class="swatch" style="--c:${line.colour}"></span><b>${esc(line.name)}</b><span class="muted">${esc(line.family)} · ${members(id).length} languages</span><button type="button" class="btn btn-small btn-quiet li-x" aria-label="Close">Close</button></div>
@@ -80,7 +90,11 @@ export function createExplore(ctx) {
     const m = members(id);
     const branches = [...new Set(m.map((c) => S[c].branch))];
     return `<div class="lg-row" data-line="${id}"><button type="button" class="lg-main" data-line="${id}"><span class="swatch" style="--c:${l.colour}"></span><span class="lg-name">${esc(l.name)}</span><span class="lg-n num">${m.length}</span></button><span class="lg-fam">${esc(l.family)}${branches.length > 1 ? ` · ${branches.map(esc).join(', ')}` : ''}</span></div>`;
-  }).join('')}<div class="lg-row"><span class="lg-main lg-single"><span class="swatch swatch-none"></span><span class="lg-name">On their own</span><span class="lg-n num">6</span></span><span class="lg-fam">${['sqi', 'hye', 'mlt', 'xal', 'eus', 'epo'].map((c) => `<button type="button" class="lg-chip" data-st="${c}">${esc(chart.leaves[c].english)}</button>`).join(' ')}</span></div>
+  }).join('')}<div class="lg-row"><span class="lg-main lg-single"><span class="swatch swatch-none"></span><span class="lg-name">On their own</span><span class="lg-n num">6</span></span><span class="lg-fam">${['sqi', 'hye', 'mlt', 'xal', 'eus', 'epo'].map((c) => `<button type="button" class="lg-chip" data-st="${c}">${esc(leaves[c].english)}</button>`).join(' ')}</span></div>
+    <p class="label lg-head">Bus routes</p><p class="hint">Regional languages that are not on the poster. A route that starts at one station and ends at another passes between two main languages; a short route starts at one.</p>${Object.entries(B).map(([id, b]) => {
+      const stops = stopsOf(id);
+      return `<div class="lg-row" data-line="bus:${id}"><button type="button" class="lg-main" data-line="bus:${id}"><span class="swatch swatch-bus" style="--c:${L[b.line].colour}"></span><span class="lg-name">${esc(b.name)}</span><span class="lg-n num">${stops.length}</span></button><span class="lg-fam">${esc(cap(busInfo(stops[0]).text))}: ${stops.map((c) => `<button type="button" class="lg-chip" data-st="${c}">${esc(leaves[c].english)}</button>`).join(' ')}</span></div>`;
+    }).join('')}
     <p class="hint">Dashed walkways join neighbours that share a border or a city, such as Basque with Spanish and French. They show contact, not kinship.</p>`;
   const lineBtn = (e) => e.target.closest('[data-line].lg-main');
   legend.addEventListener('click', (e) => {
@@ -98,13 +112,21 @@ export function createExplore(ctx) {
   const coord = ([lat, lon]) => `${Math.abs(lat).toFixed(2)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lon).toFixed(2)}°${lon >= 0 ? 'E' : 'W'}`;
   function cardExtra(c) {
     const st = S[c], line = st.line ? L[st.line] : null;
+    if (st.bus) {
+      const info = busInfo(c), b = info.route;
+      return `<div class="card-line">
+        <p><span class="swatch swatch-bus" style="--c:${L[b.line].colour}"></span> <b>${esc(b.name)} bus</b> · ${esc(cap(info.text))}</p>
+        <p class="hint">Metro: the poster's 106 languages. Bus: regional languages that are not on the poster. The route shows where it sits on the map, not that it comes from the stations it joins.</p>
+        <p class="hint">Placed at the approximate centre of the area where it is spoken: ${coord(st.latlon)}.</p>
+      </div>`;
+    }
     const where = c === 'epo' ? 'No homeland: Esperanto is spoken everywhere.' : `Coordinates in Glottolog: ${coord(st.latlon)} (<a href="https://glottolog.org" target="_blank" rel="noopener">Glottolog</a>, CC BY 4.0). The map moves it onto the grid.`;
     const nb = posterNeighbour(c), same = S[nb].line && S[nb].line === st.line;
     return `<div class="card-line">
         <p>${line ? `<span class="swatch" style="--c:${line.colour}"></span> <b>${esc(line.name)} line</b> · ${esc(st.branch)} · ${esc(line.family)}` : `<span class="swatch swatch-none"></span> <b>On its own</b> · ${esc(st.branch)}${st.family ? ` · ${esc(st.family)}` : ''}`}</p>
         ${SINGLES[c] ? `<p>${esc(SINGLES[c])}</p>` : ''}
         <p class="hint">${where}</p>
-        <p class="hint">On the poster its nearest neighbour is <b>${esc(chart.leaves[nb].english)}</b>${same ? ', a relative on the same line.' : `, ${S[nb].line ? `a ${esc(L[S[nb].line].name)} language` : 'a language on its own'}${line ? ': the letters, not the family, decide.' : '.'}`}</p>
+        <p class="hint">On the poster its nearest neighbour is <b>${esc(leaves[nb].english)}</b>${same ? ', a relative on the same line.' : `, ${S[nb].line ? `a ${esc(L[S[nb].line].name)} language` : 'a language on its own'}${line ? ': the letters, not the family, decide.' : '.'}`}</p>
         <p><a class="btn btn-small btn-primary" href="index.html#lang=${encodeURIComponent(c)}">Open on the poster</a></p>
       </div>`;
   }
@@ -114,8 +136,8 @@ export function createExplore(ctx) {
     if (!c) { $('#eu-selected').innerHTML = ''; return; }
     map.mark(c, 'sel', true);
     map.setTabStop(c);
-    const lf = chart.leaves[c];
-    $('#eu-selected').innerHTML = `<div class="found-line">${ui.flagHtml(c)}<span><b>${esc(lf.english)}</b> <span class="muted">· ${esc(lf.label.split(' / ')[0])}</span><br><span class="hint">${S[c].line ? `${esc(L[S[c].line].name)} line · ${esc(S[c].branch)}` : 'On its own'}</span></span><button type="button" class="btn btn-small" data-card>Card</button></div>`;
+    const lf = leaves[c];
+    $('#eu-selected').innerHTML = `<div class="found-line">${ui.flagHtml(c)}<span><b>${esc(lf.english)}</b> <span class="muted">· ${esc(lf.label.split(' / ')[0])}</span><br><span class="hint">${S[c].bus ? `${esc(cap(busInfo(c).text))} · ${esc(busInfo(c).route.name)} bus` : S[c].line ? `${esc(L[S[c].line].name)} line · ${esc(S[c].branch)}` : 'On its own'}</span></span><button type="button" class="btn btn-small" data-card>Card</button></div>`;
     if (openCard) ui.showCard(c, cardExtra(c));
   }
   $('#eu-selected').addEventListener('click', (e) => { if (e.target.closest('[data-card]') && selected) ui.showCard(selected, cardExtra(selected)); });
@@ -127,15 +149,15 @@ export function createExplore(ctx) {
     onStation(c) { select(c, !!c); },
     onHover(h) {
       map.highlightLine(h?.line ?? null);
-      if (active && h?.line && L[h.line] && !seen.has(h.line)) { seen.add(h.line); showIntro(h.line); }
+      if (active && h?.line && (L[h.line] || h.line.startsWith('bus:')) && !seen.has(h.line)) { seen.add(h.line); showIntro(h.line); }
     },
-    onLine(id) { if (active && L[id]) showIntro(id, 12000); },
+    onLine(id) { if (active && (L[id] || id?.startsWith('bus:'))) showIntro(id, 12000); },
     key(e) {
       const dir = { ArrowLeft: 'l', ArrowRight: 'r', ArrowUp: 'u', ArrowDown: 'd', a: 'l', d: 'r', w: 'u', s: 'd' }[e.key];
       if (!dir) return false;
       const cur = document.activeElement?.closest?.('[data-st]')?.dataset.st ?? selected ?? 'ces';
       const next = map.neighbour(cur, dir);
-      if (next) { map.focusStation(next); ui.announce(`${chart.leaves[next].english}, ${S[next].line ? `${L[S[next].line].name} line` : 'on its own'}.`); }
+      if (next) { map.focusStation(next); ui.announce(`${leaves[next].english}, ${S[next].bus ? `bus stop, ${B[S[next].bus].name} route` : S[next].line ? `${L[S[next].line].name} line` : 'on its own'}.`); }
       return true;
     },
   };

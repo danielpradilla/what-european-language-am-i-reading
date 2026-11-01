@@ -5,6 +5,7 @@ export const U = 36; // world units per grid unit
 const X0 = -2, Y0 = -2, X1 = 56, Y1 = 43; // grid window drawn
 export const WORLD = { w: (X1 - X0) * U, h: (Y1 - Y0) * U };
 const FLAG = 26, HALF = FLAG / 2, FS = 11.5;
+const FB = 22, HB = FB / 2; // a bus stop is a smaller, rounded flag with a BUS plate
 const SEAS = [ // scenery names, grid positions
   ['Atlantic Ocean', 0, 19, -8], ['North Sea', 14.5, 9.2, 0], ['Baltic Sea', 26.5, 12.4, 0], ['Mediterranean Sea', 15.5, 37.8, 0],
   ['Black Sea', 38, 32.6, 0], ['Caspian Sea', 52.4, 29.5, -70], ['Norwegian Sea', 15.5, 1.2, 0],
@@ -21,19 +22,21 @@ const f1 = (n) => Math.round(n * 10) / 10;
 const polyD = (pts) => pts.map((p, i) => `${i ? 'L' : 'M'}${f1(p[0])} ${f1(p[1])}`).join('');
 const ink = (hex) => { const n = parseInt(hex.slice(1), 16); return ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000 > 150 ? '#1c1510' : '#fffaee'; };
 
-export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect, drawFlag, layout, store }) {
-  const { stations: S, lines: L, segments, transfers, coast } = europe;
+export function createEuropeMap({ svg, mini, wrap, europe, leaves, flags, aspect, drawFlag, layout, store }) {
+  const { stations: S, lines: L, segments, transfers, coast, buses = {} } = europe;
   const codes = Object.keys(S);
   const on = { station: null, hover: null, line: null };
   const reduced = () => store.settings.reduced;
   const pos = Object.fromEntries(codes.map((c) => [c, P(S[c].at)]));
-  const labelOf = (c) => chart.leaves[c].label.split(' / ')[0];
-  const lineOf = (c) => S[c].line;
+  const labelOf = (c) => leaves[c].label.split(' / ')[0];
+  const lineOf = (c) => S[c].line ?? (S[c].bus ? `bus:${S[c].bus}` : undefined); // a bus stop highlights its route
+  const colourOf = (c) => (S[c].line ? L[S[c].line].colour : S[c].bus ? L[buses[S[c].bus].line].colour : '#1c1510');
 
   // ---------- adjacency for keyboard travel: along lines, then walkways ----------
   const adj = Object.fromEntries(codes.map((c) => [c, new Set()]));
   for (const s of segments) { adj[s.from].add(s.to); adj[s.to].add(s.from); }
   for (const [a, b] of transfers) { adj[a].add(b); adj[b].add(a); }
+  for (const b of Object.values(buses)) for (const s of b.segments) { adj[s.from].add(s.to); adj[s.to].add(s.from); }
 
   // ---------- scenery ----------
   svg.textContent = '';
@@ -45,6 +48,7 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
   const defs = el('defs', {}, gCam);
   el('clipPath', { id: 'eu-clip' }, defs).append(el('rect', { width: WORLD.w, height: WORLD.h }));
   const dots = el('pattern', { id: 'eu-dots', width: 9, height: 9, patternUnits: 'userSpaceOnUse' }, defs);
+  el('clipPath', { id: 'eu-bus-clip' }, defs).append(el('rect', { x: -HB, y: -HB, width: FB, height: FB, rx: 6 }));
   el('circle', { cx: 2.5, cy: 2.5, r: 1.15, fill: '#7fbdd0', opacity: 0.55 }, dots);
   el('circle', { cx: 7, cy: 7, r: 1.15, fill: '#7fbdd0', opacity: 0.55 }, dots);
   const hatch = el('pattern', { id: 'eu-fog', width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
@@ -63,6 +67,7 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
     el('text', { x, y, class: 'eu-sea-name', 'text-anchor': 'middle', transform: rot ? `rotate(${rot} ${x} ${y})` : null }, gScene).textContent = text;
   }
   const gWalk = el('g', { class: 'eu-walks' }, gCam);
+  const gBus = el('g', { class: 'eu-buses' }, gCam);
   const gLines = el('g', { class: 'eu-lines' }, gCam);
   const gRing = el('g', { class: 'eu-ring' }, gCam);
   const gTags = el('g', { class: 'eu-tags' }, gCam);
@@ -87,6 +92,20 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
     }
   }
 
+  // ---------- bus routes: under the metro lines, thinner, with a dashed centre line ----------
+  for (const [id, b] of Object.entries(buses)) {
+    const g = el('g', { class: 'eu-bus', 'data-line': `bus:${id}` }, gBus);
+    byLine[`bus:${id}`] = [g];
+    for (const s of b.segments) {
+      const sg = el('g', { class: 'eu-seg' }, g);
+      const d = polyD(s.pts.map(P));
+      el('path', { d, class: 'eu-bus-ink' }, sg);
+      el('path', { d, class: 'eu-bus-fill', stroke: L[b.line].colour }, sg);
+      el('path', { d, class: 'eu-bus-mid' }, sg);
+      segEls.push({ s, g: sg });
+    }
+  }
+
   for (const [a, b] of transfers) {
     const [ax, ay] = pos[a], [bx, by] = pos[b];
     const d = `M${f1(ax)} ${f1(ay)}L${f1(bx)} ${f1(by)}`;
@@ -98,17 +117,24 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
   const stEls = {};
   for (const c of codes) {
     const [x, y] = pos[c];
-    const lf = chart.leaves[c];
-    const g = el('g', { class: 'eu-st', transform: `translate(${f1(x)} ${f1(y)})`, 'data-st': c, 'data-line': lineOf(c) ?? 'none', tabindex: -1, role: 'button' }, gSt);
-    const lineName = lineOf(c) ? `${L[lineOf(c)].name} line, ${S[c].branch}` : (S[c].branch === 'Constructed' ? 'no homeland' : `${S[c].branch}, on its own`);
+    const lf = leaves[c], bus = S[c].bus, F = bus ? FB : FLAG, H = F / 2, rx = bus ? 6 : 0;
+    const g = el('g', { class: bus ? 'eu-st eu-st-bus' : 'eu-st', transform: `translate(${f1(x)} ${f1(y)})`, 'data-st': c, 'data-line': lineOf(c) ?? 'none', tabindex: -1, role: 'button' }, gSt);
+    const lineName = bus ? `Bus stop, ${buses[bus].name} route` : lineOf(c) ? `${L[lineOf(c)].name} line, ${S[c].branch}` : (S[c].branch === 'Constructed' ? 'no homeland' : `${S[c].branch}, on its own`);
     g.setAttribute('aria-label', `${lf.label.split(' / ')[0]}, ${lf.english}. ${lineName}.`);
     const body = el('g', { class: 'eu-body' }, g);
-    el('rect', { x: -HALF + 2.2, y: -HALF + 2.2, width: FLAG, height: FLAG, class: 'eu-shadow' }, body);
-    el('rect', { x: -HALF - 4, y: -HALF - 4, width: FLAG + 8, height: FLAG + 8, class: 'eu-glow' }, body);
-    drawFlag(body, flags.leaves[c] ?? { files: [], layout: 'single' }, FLAG, aspect);
-    el('rect', { x: -HALF, y: -HALF, width: FLAG, height: FLAG, class: 'eu-fog' }, body);
-    el('rect', { x: -HALF, y: -HALF, width: FLAG, height: FLAG, class: 'eu-frame' }, body);
-    el('rect', { x: -HALF - 3, y: -HALF - 3, width: FLAG + 6, height: FLAG + 6, class: 'eu-hit' }, g);
+    el('rect', { x: -H + 2.2, y: -H + 2.2, width: F, height: F, rx, class: 'eu-shadow' }, body);
+    el('rect', { x: -H - 4, y: -H - 4, width: F + 8, height: F + 8, rx: rx ? 9 : 0, class: 'eu-glow' }, body);
+    if (bus) el('rect', { x: -H - 3, y: -H - 3, width: F + 6, height: F + 6, rx: 9, class: 'eu-bus-ring', fill: colourOf(c) }, body);
+    const info = flags.leaves[c] ?? { files: [], layout: 'single' };
+    drawFlag(bus ? el('g', { 'clip-path': 'url(#eu-bus-clip)' }, body) : body, info, F, aspect);
+    el('rect', { x: -H, y: -H, width: F, height: F, rx, class: 'eu-fog' }, body);
+    el('rect', { x: -H, y: -H, width: F, height: F, rx, class: 'eu-frame' }, body);
+    if (bus) {
+      const plate = el('g', { class: 'eu-bus-plate' }, body);
+      el('rect', { x: -11, y: H - 1, width: 22, height: 9, rx: 3 }, plate);
+      el('text', { x: 0, y: H + 6.2, 'text-anchor': 'middle' }, plate).textContent = 'BUS';
+    }
+    el('rect', { x: -H - 3, y: -H - 3, width: F + 6, height: F + 6, class: 'eu-hit' }, g);
     stEls[c] = { g, label: null };
     (byLine[lineOf(c) ?? 'none'] ??= []).push(g);
   }
@@ -119,9 +145,11 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
   el('circle', { cx: ex, cy: ey, r: RING, class: 'eu-ring-c' }, gRing);
 
   // ---------- labels, line-end badges and branch tags ----------
-  const flagBoxes = codes.map((c) => ({ x: pos[c][0] - HALF - 2, y: pos[c][1] - HALF - 2, w: FLAG + 4, h: FLAG + 4 }));
+  const flagBoxes = codes.map((c) => (S[c].bus
+    ? { x: pos[c][0] - HB - 4, y: pos[c][1] - HB - 4, w: FB + 8, h: FB + 14 }
+    : { x: pos[c][0] - HALF - 2, y: pos[c][1] - HALF - 2, w: FLAG + 4, h: FLAG + 4 }));
   flagBoxes[codes.indexOf('epo')] = { x: ex - RING, y: ey - RING, w: RING * 2, h: RING * 2 };
-  const lineSegs = segments.map((s) => s.pts.map(P));
+  const lineSegs = [...segments, ...Object.values(buses).flatMap((b) => b.segments)].map((s) => s.pts.map(P));
   const pts = layout.samplePoints(lineSegs);
   const bounds = WORLD;
   const taken = [];
@@ -161,7 +189,7 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
     const lines = layout.wrapLabel(labelOf(c));
     const w = Math.max(...lines.map((l) => [...l].length)) * FS * 0.58 + 2;
     const h = lines.length * FS * 1.12;
-    return { id: c, cx: pos[c][0], cy: pos[c][1], w, h, lines, half: c === 'epo' ? RING : HALF };
+    return { id: c, cx: pos[c][0], cy: pos[c][1], w, h, lines, half: c === 'epo' ? RING : S[c].bus ? HB + 3 : HALF };
   });
   const ringText = { x: ex - 52, y: ey - RING - 17, w: 104, h: 13 };
   const placed = layout.placeLabels({ items, fixed: [...flagBoxes, ringText, ...taken], pts, bounds, half: HALF });
@@ -213,7 +241,7 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
   const mmClip = el('clipPath', { id: 'mm-clip' }, mini);
   mmClip.append(el('rect', { width: WORLD.w, height: WORLD.h }));
   el('path', { d: landD, class: 'mm-land', 'clip-path': 'url(#mm-clip)' }, mini);
-  for (const c of codes) el('circle', { cx: pos[c][0], cy: pos[c][1], r: 15, fill: lineOf(c) ? L[lineOf(c)].colour : '#1c1510', class: 'mm-dot' }, mini);
+  for (const c of codes) el('circle', { cx: pos[c][0], cy: pos[c][1], r: S[c].bus ? 11 : 15, fill: colourOf(c), class: S[c].bus ? 'mm-dot mm-bus' : 'mm-dot' }, mini);
   const mView = el('rect', { class: 'mm-view' }, mini);
 
   // ---------- camera ----------
@@ -316,7 +344,7 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
   }, { passive: false });
   svg.addEventListener('click', (e) => {
     if (moved > 12) return; // a drag, not a tap
-    const st = e.target.closest?.('[data-st]'), ln = e.target.closest?.('.eu-line, .eu-badge, .eu-tag');
+    const st = e.target.closest?.('[data-st]'), ln = e.target.closest?.('.eu-line, .eu-bus, .eu-badge, .eu-tag');
     if (st) on.station?.(st.dataset.st);
     else if (ln) on.line?.(ln.dataset.line);
     else on.station?.(null);
@@ -328,7 +356,7 @@ export function createEuropeMap({ svg, mini, wrap, europe, chart, flags, aspect,
   const hov = (e) => {
     if (e.pointerType === 'touch') return; // a finger crossing lines while panning is not a hover
     const st = e.target.closest?.('[data-st]');
-    const ln = e.target.closest?.('.eu-line, .eu-badge, .eu-tag');
+    const ln = e.target.closest?.('.eu-line, .eu-bus, .eu-badge, .eu-tag');
     on.hover?.(st ? { code: st.dataset.st, line: lineOf(st.dataset.st) } : ln ? { line: ln.dataset.line } : null);
   };
   svg.addEventListener('pointerover', hov);

@@ -5,7 +5,7 @@ const EXACT = 100, FAMILY = 40;
 const icon = (id, style = '') => `<svg class="icon" aria-hidden="true" ${style ? `style="${style}"` : ''}><use href="#${id}"/></svg>`;
 
 export function createGuess(ctx, replay) {
-  const { chart, europe, samples, map, panel, ui, audio, store, engine } = ctx;
+  const { leaves, europe, samples, map, panel, ui, audio, store, engine } = ctx;
   const { esc } = ui;
   const S = europe.stations, L = europe.lines;
   const hud = $('#hud'), box = $('#guess-panel'), dlgOver = $('#dlg-over');
@@ -13,8 +13,8 @@ export function createGuess(ctx, replay) {
   let active = false;
   let run = null; // { n, score, streak, best, exact, family, picks: [{ lang, pts }] , order, round }
 
-  const lineOf = (c) => S[c].line;
-  const nameOf = (c) => chart.leaves[c].english;
+  const lineOf = (c) => S[c].line ?? europe.buses[S[c].bus]?.line; // a bus stop counts as the family of its route
+  const nameOf = (c) => leaves[c].english;
 
   function drawHud() {
     if (!run) { hud.innerHTML = ''; return; }
@@ -90,10 +90,10 @@ export function createGuess(ctx, replay) {
 
     const tone = pts === EXACT ? 'success' : pts ? 'info' : 'error';
     const head = pts === EXACT ? `Exact! +${EXACT}` : pts ? `Right family +${FAMILY}` : 'Not this time. 0 points';
-    const lineName = lineOf(right) ? `${L[lineOf(right)].name} line, ${S[right].branch}` : 'on its own';
+    const lineName = S[right].bus ? `${ctx.busInfo(right).text}, ${europe.buses[S[right].bus].name} route` : lineOf(right) ? `${L[lineOf(right)].name} line, ${S[right].branch}` : 'on its own';
     const last = run.n >= ROUNDS;
     box.innerHTML = `<div class="note note-${tone}"><strong>${head}</strong>
-        <span class="found-line">${ui.flagHtml(right)}<span>It was <b>${esc(nameOf(right))}</b> (${esc(chart.leaves[right].label.split(' / ')[0])}), ${esc(lineName)}.${code !== right ? ` You picked ${esc(nameOf(code))}${lineOf(code) ? `, ${esc(L[lineOf(code)].name)} line` : ''}.` : ''}</span></span>
+        <span class="found-line">${ui.flagHtml(right)}<span>It was <b>${esc(nameOf(right))}</b> (${esc(leaves[right].label.split(' / ')[0])}), ${esc(lineName)}.${code !== right ? ` You picked ${esc(nameOf(code))}${S[code].line ? `, ${esc(L[S[code].line].name)} line` : S[code].bus ? ', a bus stop' : ''}.` : ''}</span></span>
         ${route.leaf && route.leaf !== right ? `<span>The poster sends this text to <b>${esc(nameOf(route.leaf))}</b>: its letters decide, not the family.</span>` : route.leaf ? '<span>The poster agrees: the route below ends at the same language.</span>' : ''}</span></div>
       <div class="row"><button class="btn btn-primary" type="button" id="guess-next">${last ? 'See results' : 'Next round'} <kbd>Enter</kbd></button></div>`;
     $('#guess-next').onclick = next;

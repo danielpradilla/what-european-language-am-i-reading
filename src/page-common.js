@@ -2,9 +2,10 @@
 const $ = (s) => document.querySelector(s);
 
 /** <image> ignores preserveAspectRatio="slice" for SVG files, so the boards need each flag's aspect to crop it themselves. */
-export async function loadAspects(flags) {
+export async function loadAspects(flags, codes = Object.keys(flags.leaves)) {
   const aspect = {};
-  await Promise.all(Object.keys(flags.files).map(async (f) => {
+  const files = new Set(codes.flatMap((c) => flags.leaves[c]?.files ?? [])); // only the flags this page draws
+  await Promise.all([...files].map(async (f) => {
     try {
       const tag = (await (await fetch(`assets/flags/${f}`)).text()).match(/<svg\b[^>]*>/is)?.[0] ?? '';
       const vb = tag.match(/viewBox\s*=\s*"([^"]+)"/i)?.[1].trim().split(/[\s,]+/).map(Number);

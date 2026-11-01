@@ -10,7 +10,7 @@ Play it at [danielpradilla.info/projects/what-european-language-am-i-reading](ht
 - **Detect**: paste or type a text, or fetch one from a URL. The snake follows the chart's rules and the letters that decided each turn are highlighted in the text. Once the route is confirmed, the language model checks it: if it disagrees with confidence, the snake explains where the chart turned, shows the clues it reads, and takes a dashed shortcut to the model's flag.
 - **Arcade**: steer the snake through real text samples against the clock; a wrong turn shows the letter you missed, with lives, streaks and a local high-score table.
 
-The Europe map page has its own **Detect**: a Naive Bayes language model (`src/data/model.json`, trained with `tools/build_model.py`) picks yes/no questions for your text, the snake answers them, and the languages ruled out fade from the map until one is left.
+The Europe map page has its own **Detect**: a Naive Bayes language model (`src/data/model.json`, trained with `tools/build_model.py`) picks yes/no questions for your text, the snake answers them, and the languages ruled out fade from the map until one is left. The Europe map also has bus routes: 32 regional languages that are not on the poster (Sicilian, Venetian, Asturian, Low German, Scots, Silesian and more) branch off or run between the 106 metro stations; the poster page never shows them.
 
 The chart sorts languages by the letters they use, not by family or geography. Short or unusual texts can take odd routes; the app follows the chart exactly and shows why.
 

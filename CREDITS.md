@@ -117,12 +117,52 @@ No sample, because no openly licensed text was found that the chart routes to th
 `src/data/model.json` holds only statistics (gram weights), not text. It was trained on:
 
 - Introductions of random Wikipedia articles in 86 languages, and Wikimedia Incubator test-wiki text: CC BY-SA 4.0 ([Wikimedia Foundation](https://wikimediafoundation.org/)); authors are listed in each page's history.
+- For the 31 regional languages and varieties of the Europe map (Sicilian, Neapolitan, Venetian, Lombard, Piedmontese, Ligurian, Asturian, Aragonese, Extremaduran, Mirandese, Judaeo-Spanish, Walloon, Picard, Norman, Franco-Provençal, Low German, Bavarian, Alemannic, Kölsch, Saterland Frisian, Limburgish, West Flemish, Zeelandic, Scots, Cornish, Manx, Silesian, Rusyn, Latgalian, Samogitian, Võro): introductions of random articles from their own Wikipedias, fetched through the MediaWiki API (about 250 KB each, CC BY-SA 4.0). Meänkieli: Wikimedia Incubator test-wiki `Wp/fit` (CC BY-SA 4.0).
 - [Tatoeba](https://tatoeba.org/) sentences: CC BY 2.0 FR.
 - Swiss federal legislation (Fedlex), for Swiss Standard German: not protected by copyright (Swiss Copyright Act, art. 5).
 
+### Europe map samples
+
+Samples for the regional languages of the Europe map (`data/europe-samples.json`), whole sentences quoted unchanged from the first paragraph of the page.
+
+| Code | Language | Source | Licence |
+|---|---|---|---|
+| `scn` | Sicilian | [Canzuna (mètrica)](https://scn.wikipedia.org/w/index.php?oldid=723794) | CC BY-SA 4.0 |
+| `nap` | Neapolitan | [Chianeta nano](https://nap.wikipedia.org/w/index.php?oldid=672478) | CC BY-SA 4.0 |
+| `vec` | Venetian | [Shalom](https://vec.wikipedia.org/w/index.php?oldid=1228457) | CC BY-SA 4.0 |
+| `lmo` | Lombard | [Eletronega](https://lmo.wikipedia.org/w/index.php?oldid=1305765) | CC BY-SA 4.0 |
+| `pms` | Piedmontese | [Gundelfingen im Breisgau](https://pms.wikipedia.org/w/index.php?oldid=853479) | CC BY-SA 4.0 |
+| `lij` | Ligurian | [Violin](https://lij.wikipedia.org/w/index.php?oldid=224278) | CC BY-SA 4.0 |
+| `ast` | Asturian | [L'Hôpital-le-Grand](https://ast.wikipedia.org/w/index.php?oldid=3545717) | CC BY-SA 4.0 |
+| `arg` | Aragonese | [Pernil](https://an.wikipedia.org/w/index.php?oldid=2427214) | CC BY-SA 4.0 |
+| `ext` | Extremaduran | [Sistema artazimutal](https://ext.wikipedia.org/w/index.php?oldid=118516) | CC BY-SA 4.0 |
+| `mwl` | Mirandese | [Eigreija de Infainç](https://mwl.wikipedia.org/w/index.php?oldid=98087) | CC BY-SA 4.0 |
+| `lad` | Judaeo-Spanish (Ladino) | [Esnoga de Coro](https://lad.wikipedia.org/w/index.php?oldid=210197) | CC BY-SA 4.0 |
+| `wln` | Walloon | [Vocabulaire de noms wallons d'animaux (motlî)](https://wa.wikipedia.org/w/index.php?oldid=426142) | CC BY-SA 4.0 |
+| `pcd` | Picard | [Bieucourt-su-l'Hallu](https://pcd.wikipedia.org/w/index.php?oldid=70611) | CC BY-SA 4.0 |
+| `nrf` | Norman | [Veie](https://nrf.wikipedia.org/w/index.php?oldid=204637) | CC BY-SA 4.0 |
+| `frp` | Franco-Provençal (Arpitan) | [Champagne (Dôfenât)](https://frp.wikipedia.org/w/index.php?oldid=186414) | CC BY-SA 4.0 |
+| `nds` | Low German | [Achterhooks](https://nds.wikipedia.org/w/index.php?oldid=1040899) | CC BY-SA 4.0 |
+| `bar` | Bavarian | [Seyhan (Adana)](https://bar.wikipedia.org/w/index.php?oldid=709024) | CC BY-SA 4.0 |
+| `gsw` | Alemannic | [Deutsche Reichsbahn (1945–1993)](https://als.wikipedia.org/w/index.php?oldid=1076806) | CC BY-SA 4.0 |
+| `ksh` | Kölsch | [Airbus A380](https://ksh.wikipedia.org/w/index.php?oldid=1608733) | CC BY-SA 4.0 |
+| `stq` | Saterland Frisian | [Saarlound](https://stq.wikipedia.org/w/index.php?oldid=112224) | CC BY-SA 4.0 |
+| `lim` | Limburgish | [Sjièr](https://li.wikipedia.org/w/index.php?oldid=443694) | CC BY-SA 4.0 |
+| `vls` | West Flemish | [Ramegnies-Chin](https://vls.wikipedia.org/w/index.php?oldid=304231) | CC BY-SA 4.0 |
+| `zea` | Zeelandic | [Sardientoren](https://zea.wikipedia.org/w/index.php?oldid=100578) | CC BY-SA 4.0 |
+| `sco` | Scots | [Azerbaijan Naitional Academy o Sciences](https://sco.wikipedia.org/w/index.php?oldid=905846) | CC BY-SA 4.0 |
+| `cor` | Cornish | [Merher (planet)](https://kw.wikipedia.org/w/index.php?oldid=215099) | CC BY-SA 4.0 |
+| `glv` | Manx | [Northamptonshire](https://gv.wikipedia.org/w/index.php?oldid=360227) | CC BY-SA 4.0 |
+| `szl` | Silesian | [Caloplaca parviloba](https://szl.wikipedia.org/w/index.php?oldid=277294) | CC BY-SA 4.0 |
+| `rue` | Rusyn | [Марс (планета)](https://rue.wikipedia.org/w/index.php?oldid=142060) | CC BY-SA 4.0 |
+| `ltg` | Latgalian | [Buordaits](https://ltg.wikipedia.org/w/index.php?oldid=34261) | CC BY-SA 4.0 |
+| `sgs` | Samogitian | [Šėlienā (Vėlnios)](https://bat-smg.wikipedia.org/w/index.php?oldid=319620) | CC BY-SA 4.0 |
+| `vro` | Võro | [Harglõ kihlkund](https://fiu-vro.wikipedia.org/w/index.php?oldid=180378) | CC BY-SA 4.0 |
+| `fit` | Meänkieli | [Wp/fit/Meänkieli](https://incubator.wikimedia.org/wiki/Wp/fit/Meänkieli) | CC BY-SA 4.0 (Wikimedia Incubator) |
+
 ## Flags
 
-Flag images are SVG files from Wikimedia Commons, stored in `assets/flags/`. The chart's own choice of flag is kept for every language (section 5.4 of `SPEC.md`). Yiddish shows the Hebrew chai symbol (חי), as on the chart.
+Flag images are SVG files from Wikimedia Commons, stored in `assets/flags/`. The chart's own choice of flag is kept for every language (section 5.4 of `SPEC.md`). Yiddish shows the Hebrew chai symbol (חי), as on the chart. Judaeo-Spanish (`lad`) has no agreed flag and shows the Hebrew letter ל (lamed) on a plain tile. The Europe map's regional languages use regional flags: Scots shares the Scottish flag, and Mirandese uses the proposed flag of the Miranda de l Douro cultural region (the municipality's own flag is only a bitmap on Commons). Large Commons flags were reduced with `scour` (metadata, comments and unused ids removed) without changing the drawing.
 
 | File | Used for | Source | Author | Licence |
 |---|---|---|---|---|
@@ -194,7 +234,7 @@ Flag images are SVG files from Wikimedia Commons, stored in `assets/flags/`. The
 | `russia.svg` | `rus` | [Flag of Russia](https://commons.wikimedia.org/wiki/File:Flag_of_Russia.svg) | Peter the Great | Public domain |
 | `sami.svg` | `sme`, `sms`, `smn`, `sju`, `smj`, `sma`, `sjd` | [Sami flag](https://commons.wikimedia.org/wiki/File:Sami_flag.svg) | Jeltz | Public domain |
 | `sardinia.svg` | `srd` | [Flag of Sardinia, Italy](https://commons.wikimedia.org/wiki/File:Flag_of_Sardinia,_Italy.svg) | Angelus | CC BY-SA 3.0 |
-| `scotland.svg` | `gla` | [Flag of Scotland](https://commons.wikimedia.org/wiki/File:Flag_of_Scotland.svg) | none known | Public domain |
+| `scotland.svg` | `gla`, `sco` | [Flag of Scotland](https://commons.wikimedia.org/wiki/File:Flag_of_Scotland.svg) | none known | Public domain |
 | `serbia.svg` | `hbs`, `srp` | [Flag of Serbia](https://commons.wikimedia.org/wiki/File:Flag_of_Serbia.svg) | See File history below for details. | Public domain |
 | `slovakia.svg` | `slk` | [Flag of Slovakia](https://commons.wikimedia.org/wiki/File:Flag_of_Slovakia.svg) | Original: Ladislav Čisárik and Ladislav Vrtel Vector: SKopp | Public domain |
 | `slovenia.svg` | `slv` | [Flag of Slovenia](https://commons.wikimedia.org/wiki/File:Flag_of_Slovenia.svg) | Original: Marko Pogačnik Vector: Achim1999 | Public domain |
@@ -209,6 +249,36 @@ Flag images are SVG files from Wikimedia Commons, stored in `assets/flags/`. The
 | `ukraine.svg` | `ukr` | [Flag of Ukraine](https://commons.wikimedia.org/wiki/File:Flag_of_Ukraine.svg) | Government of Ukraine | Public domain |
 | `veps.svg` | `vep` | [Flag of Vepsia](https://commons.wikimedia.org/wiki/File:Flag_of_Vepsia.svg) | User:.... | Public domain |
 | `wales.svg` | `cym` | [Flag of Wales](https://commons.wikimedia.org/wiki/File:Flag_of_Wales.svg) | Unknown Vector graphics by Tobias Jakobs | Public domain |
+| `sicily.svg` | `scn` | [Flag of Sicily (revised)](https://commons.wikimedia.org/wiki/File:Flag_of_Sicily_(revised).svg) | Angelo Romano | Public domain |
+| `campania.svg` | `nap` | [Flag of Campania](https://commons.wikimedia.org/wiki/File:Flag_of_Campania.svg) | F l a n k e r | Public domain |
+| `veneto.svg` | `vec` | [Flag of Veneto](https://commons.wikimedia.org/wiki/File:Flag_of_Veneto.svg) | Derivative work: F l a n k e r; rasterised to a 300 px WebP inside an SVG wrapper | CC BY-SA 3.0 |
+| `lombardy.svg` | `lmo` | [Flag of Lombardy](https://commons.wikimedia.org/wiki/File:Flag_of_Lombardy.svg) | Pino Tovaglia, Bob Noorda, Roberto Sambonet and Bruno Munari | Public domain |
+| `piedmont.svg` | `pms` | [Flag of Piedmont](https://commons.wikimedia.org/wiki/File:Flag_of_Piedmont.svg) | Orzetto | Public domain |
+| `liguria.svg` | `lij` | [Flag of Liguria](https://commons.wikimedia.org/wiki/File:Flag_of_Liguria.svg) | F l a n k e r | Public domain |
+| `asturias.svg` | `ast` | [Flag of Asturias](https://commons.wikimedia.org/wiki/File:Flag_of_Asturias.svg) | Banderas | Public domain |
+| `aragon.svg` | `arg` | [Flag of Aragon](https://commons.wikimedia.org/wiki/File:Flag_of_Aragon.svg) | Not stated on Commons | CC BY-SA 3.0 |
+| `extremadura.svg` | `ext` | [Flag of Extremadura, Spain (with coat of arms)](https://commons.wikimedia.org/wiki/File:Flag_of_Extremadura,_Spain_(with_coat_of_arms).svg) | BetacommandBot | Public domain |
+| `miranda-do-douro.svg` | `mwl` | [Proposed flag of Miranda de l Douro (MPB)](https://commons.wikimedia.org/wiki/File:Proposed_flag_of_Miranda_de_l_Douro_(MPB).svg) | ItsGandaM1ke | CC BY 4.0 |
+| `wallonia.svg` | `wln` | [Flag of Wallonia](https://commons.wikimedia.org/wiki/File:Flag_of_Wallonia.svg) | Tom Lemmens | CC0 |
+| `picardy.svg` | `pcd` | [Flag of Picardie](https://commons.wikimedia.org/wiki/File:Flag_of_Picardie.svg) | Patricia.fidi | CC0 |
+| `normandy.svg` | `nrf` | [Flag of Normandy](https://commons.wikimedia.org/wiki/File:Flag_of_Normandy.svg) | andersersej | CC BY-SA 3.0 |
+| `arpitania.svg` | `frp` | [Flag of Arpitania Movement](https://commons.wikimedia.org/wiki/File:Flag_of_Arpitania_Movement.svg) | Original GIF: Jolle Vectorization: SiBr4 | CC BY-SA 3.0 |
+| `lower-saxony.svg` | `nds` | [Flag of Lower Saxony](https://commons.wikimedia.org/wiki/File:Flag_of_Lower_Saxony.svg) | Not stated on Commons | Public domain |
+| `bavaria.svg` | `bar` | [Flag of Bavaria (striped)](https://commons.wikimedia.org/wiki/File:Flag_of_Bavaria_(striped).svg) | Digitized by User:Boris23 | Public domain |
+| `alemannic.svg` | `gsw` | [Flag of Alemannics](https://commons.wikimedia.org/wiki/File:Flag_of_Alemannics.svg) | Wheatley2 | CC0 |
+| `cologne.svg` | `ksh` | [Flagge Köln](https://commons.wikimedia.org/wiki/File:Flagge_K%C3%B6ln.svg) | Neubearbeitung der Flagge der Stadt Köln durch Jürgen Krause . | Public domain |
+| `saterland.svg` | `stq` | [DEU Saterland Flag](https://commons.wikimedia.org/wiki/File:DEU_Saterland_Flag.svg) | Original: Bernd Stolle Vector: Ætoms | Public domain |
+| `limburg-nl.svg` | `lim` | [Flag of Limburg (Netherlands)](https://commons.wikimedia.org/wiki/File:Flag_of_Limburg_(Netherlands).svg) | Louis Maris, SVG by User:GeeKaa, and SVG revision bij User:D'Arch | Public domain |
+| `west-flanders.svg` | `vls` | [Flag of West Flanders](https://commons.wikimedia.org/wiki/File:Flag_of_West_Flanders.svg) | Not stated on Commons | Public domain |
+| `zeeland.svg` | `zea` | [Flag of Zeeland](https://commons.wikimedia.org/wiki/File:Flag_of_Zeeland.svg) | T.A.J.W. Schorer | Public domain |
+| `cornwall.svg` | `cor` | [Flag of Cornwall](https://commons.wikimedia.org/wiki/File:Flag_of_Cornwall.svg) | Jon Harald Søby | Public domain |
+| `isle-of-man.svg` | `glv` | [Flag of the Isle of Man](https://commons.wikimedia.org/wiki/File:Flag_of_the_Isle_of_Man.svg) | Edited by Reisio, Alkari, e.a. | CC0 |
+| `upper-silesia.svg` | `szl` | [Flag of Upper Silesia](https://commons.wikimedia.org/wiki/File:Flag_of_Upper_Silesia.svg) | Andrew J.Kurbiko | CC0 |
+| `rusyn.svg` | `rue` | [Flag of Rusyns](https://commons.wikimedia.org/wiki/File:Flag_of_Rusyns.svg) | Лобачев Владимир | CC BY-SA 4.0 |
+| `latgale.svg` | `ltg` | [Official flag of Latgale](https://commons.wikimedia.org/wiki/File:Official_flag_of_Latgale.svg) | Original: President of Latvia Vector: Great Brightstar | Public domain |
+| `samogitia.svg` | `sgs` | [Flag of Samogitia](https://commons.wikimedia.org/wiki/File:Flag_of_Samogitia.svg) | chris 論 | Public domain |
+| `voro.svg` | `vro` | [Võrumaa lipp](https://commons.wikimedia.org/wiki/File:V%C3%B5rumaa_lipp.svg) | Not stated on Commons | Public domain |
+| `tornedalen.svg` | `fit` | [Flag of Tornedalians (2007)](https://commons.wikimedia.org/wiki/File:Flag_of_Tornedalians_(2007).svg) | Mysid | Public domain |
 
 ## Europe map
 

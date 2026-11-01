@@ -1,0 +1,228 @@
+{
+ "leaves": {
+  "scn": {
+   "label": "sicilianu",
+   "english": "Sicilian",
+   "parent": "ita",
+   "wiki": "scn",
+   "note": "Spoken in Sicily and parts of southern Calabria and Apulia; recognised as a regional language by UNESCO and Sicilian law, not by Italy as a whole."
+  },
+  "nap": {
+   "label": "napulitano",
+   "english": "Neapolitan",
+   "parent": "ita",
+   "wiki": "nap",
+   "note": "Spoken in Naples, Campania and much of southern Italy; one of the best-known Italian regional languages, with a long literary and song tradition."
+  },
+  "vec": {
+   "label": "vèneto",
+   "english": "Venetian",
+   "parent": "ita",
+   "wiki": "vec",
+   "note": "Spoken in Veneto, parts of Friuli, Trentino, Istria and Dalmatia, and by emigrant communities in Brazil; recognised as a regional language in Veneto."
+  },
+  "lmo": {
+   "label": "lombard",
+   "english": "Lombard",
+   "parent": "ita",
+   "wiki": "lmo",
+   "note": "Spoken in Lombardy, parts of Piedmont and Emilia, and in Ticino and Graubünden in Switzerland; has many local varieties."
+  },
+  "pms": {
+   "label": "piemontèis",
+   "english": "Piedmontese",
+   "parent": "ita",
+   "wiki": "pms",
+   "note": "Spoken in Piedmont in north-western Italy; recognised as a regional language by the region."
+  },
+  "lij": {
+   "label": "ligure",
+   "english": "Ligurian",
+   "parent": "ita",
+   "wiki": "lij",
+   "note": "Spoken in Liguria, around Monaco and Mentone, and in Corsican and Sardinian enclaves; Genoese is its main variety."
+  },
+  "ast": {
+   "label": "asturianu",
+   "english": "Asturian",
+   "parent": "spa",
+   "wiki": "ast",
+   "note": "Spoken in Asturias in north-western Spain; protected but not official, and taught in schools."
+  },
+  "arg": {
+   "label": "aragonés",
+   "english": "Aragonese",
+   "parent": "spa",
+   "wiki": "an",
+   "note": "Spoken in the Pyrenean valleys of Aragon in north-eastern Spain; has few speakers and is protected but not official."
+  },
+  "ext": {
+   "label": "estremeñu",
+   "english": "Extremaduran",
+   "parent": "spa",
+   "wiki": "ext",
+   "note": "Spoken in parts of Extremadura and Cáceres province in western Spain; a small, little-standardised variety close to Leonese."
+  },
+  "mwl": {
+   "label": "mirandés",
+   "english": "Mirandese",
+   "parent": "por",
+   "wiki": "mwl",
+   "note": "Spoken around Miranda do Douro in north-eastern Portugal; recognised as a co-official language there since 1999."
+  },
+  "lad": {
+   "label": "djudeo-espanyol",
+   "english": "Judaeo-Spanish (Ladino)",
+   "parent": "spa",
+   "wiki": "lad",
+   "note": "Language of the Sephardic Jews, descended from medieval Spanish; now spoken mainly in Israel, Turkey and the Balkans, and endangered."
+  },
+  "wln": {
+   "label": "walon",
+   "english": "Walloon",
+   "parent": "fra",
+   "wiki": "wa",
+   "note": "Spoken in Wallonia in southern Belgium; a Romance language of the langues d'oïl, recognised as a regional language in Belgium."
+  },
+  "pcd": {
+   "label": "picard",
+   "english": "Picard",
+   "parent": "fra",
+   "wiki": "pcd",
+   "note": "Spoken in Picardy and Nord-Pas-de-Calais in France and around Tournai in Belgium; a langue d'oïl."
+  },
+  "nrf": {
+   "label": "normaund",
+   "english": "Norman",
+   "parent": "fra",
+   "wiki": "nrf",
+   "note": "Spoken in Normandy and the Channel Islands (Jèrriais, Guernésiais); a langue d'oïl with few speakers."
+  },
+  "frp": {
+   "label": "arpetan",
+   "english": "Franco-Provençal (Arpitan)",
+   "parent": "fra",
+   "wiki": "frp",
+   "note": "Spoken in Savoy, Lyon, western Switzerland and the Aosta Valley; a Romance language distinct from both French and Occitan."
+  },
+  "nds": {
+   "label": "plattdüütsch",
+   "english": "Low German",
+   "parent": "deu",
+   "wiki": "nds",
+   "note": "Spoken in northern Germany and the eastern Netherlands; recognised under the European Charter for Regional or Minority Languages."
+  },
+  "bar": {
+   "label": "boarisch",
+   "english": "Bavarian",
+   "parent": "deu",
+   "wiki": "bar",
+   "note": "Spoken in Bavaria, Austria and South Tyrol; a group of Upper German dialects with many speakers."
+  },
+  "gsw": {
+   "label": "alemannisch",
+   "english": "Alemannic",
+   "parent": "de-CH",
+   "wiki": "als",
+   "note": "Spoken in German-speaking Switzerland, Baden-Württemberg, Alsace and Vorarlberg; Swiss German is its best-known form."
+  },
+  "ksh": {
+   "label": "kölsch",
+   "english": "Kölsch",
+   "parent": "deu",
+   "wiki": "ksh",
+   "note": "Spoken in and around Cologne in western Germany; a Ripuarian dialect protected in North Rhine-Westphalia."
+  },
+  "stq": {
+   "label": "seeltersk",
+   "english": "Saterland Frisian",
+   "parent": "frr",
+   "wiki": "stq",
+   "note": "Spoken by about 2,000 people in the Saterland in Lower Saxony, Germany; the last living East Frisian variety."
+  },
+  "lim": {
+   "label": "limburgs",
+   "english": "Limburgish",
+   "parent": "nld",
+   "wiki": "li",
+   "note": "Spoken in the Dutch and Belgian provinces of Limburg and in the neighbouring German Rhineland; recognised as a regional language in the Netherlands."
+  },
+  "vls": {
+   "label": "west-vlams",
+   "english": "West Flemish",
+   "parent": "nld",
+   "wiki": "vls",
+   "note": "Spoken in West Flanders in Belgium, Zeelandic Flanders and French Flanders; a Dutch dialect group with a distinctive sound system."
+  },
+  "zea": {
+   "label": "zeêuws",
+   "english": "Zeelandic",
+   "parent": "nld",
+   "wiki": "zea",
+   "note": "Spoken in the province of Zeeland in the south-western Netherlands; a Dutch dialect group close to West Flemish."
+  },
+  "sco": {
+   "label": "scots",
+   "english": "Scots",
+   "parent": "eng",
+   "wiki": "sco",
+   "note": "Spoken in Lowland Scotland and Ulster; a Germanic language related to English, recognised as a regional language in the UK."
+  },
+  "cor": {
+   "label": "kernewek",
+   "english": "Cornish",
+   "parent": "cym",
+   "wiki": "kw",
+   "note": "A Celtic language of Cornwall in south-west England; it died out as a community language in the 18th–19th century and has been revived."
+  },
+  "glv": {
+   "label": "gaelg",
+   "english": "Manx",
+   "parent": "gla",
+   "wiki": "gv",
+   "note": "A Celtic language of the Isle of Man; the last native speaker died in 1974, and it has been revived and is taught in schools."
+  },
+  "szl": {
+   "label": "ślōnski",
+   "english": "Silesian",
+   "parent": "pol",
+   "wiki": "szl",
+   "note": "Spoken in Upper Silesia in south-western Poland and nearby Czech areas; recognised as a regional language in Poland only in debate, not by law."
+  },
+  "rue": {
+   "label": "русиньскый",
+   "english": "Rusyn",
+   "parent": "ukr",
+   "wiki": "rue",
+   "note": "Spoken by Rusyns in the Carpathians in Slovakia, Poland, Ukraine, Serbia and Croatia; recognised as a minority language in several of these countries."
+  },
+  "ltg": {
+   "label": "latgalīšu",
+   "english": "Latgalian",
+   "parent": "lav",
+   "wiki": "ltg",
+   "note": "Spoken in Latgale in eastern Latvia; protected as a historical variety of Latvian."
+  },
+  "sgs": {
+   "label": "žemaitėška",
+   "english": "Samogitian",
+   "parent": "lit",
+   "wiki": "bat-smg",
+   "note": "Spoken in Samogitia in north-western Lithuania; a Baltic variety with a separate written tradition."
+  },
+  "vro": {
+   "label": "võro",
+   "english": "Võro",
+   "parent": "est",
+   "wiki": "fiu-vro",
+   "note": "Spoken in south-eastern Estonia; a South Estonian language with its own written standard and a cultural-institution recognition."
+  },
+  "fit": {
+   "label": "meänkieli",
+   "english": "Meänkieli",
+   "parent": "fin",
+   "wiki": "",
+   "note": "Spoken in the Tornedalen valley in northern Sweden; recognised as an official minority language in Sweden since 2000."
+  }
+ }
+}

@@ -1,0 +1,5 @@
+<svg image-rendering="optimizeQuality" shape-rendering="geometricPrecision" version="1.1" viewBox="0 0 1485 900" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
+ <rect width="1485" height="900" fill="#fcd116"/>
+ <rect y="300" width="1485" height="600" fill="#fff"/>
+ <rect y="600" width="1485" height="300" fill="#005b99"/>
+</svg>

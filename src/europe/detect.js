@@ -7,10 +7,10 @@ const letters = (t) => (t.match(/\p{L}/gu) ?? []).length;
 const times = (k) => (k === 1 ? 'once' : k === 2 ? 'twice' : `${k} times`);
 
 export function createDetect(ctx, replay) {
-  const { engine, chart, europe, model, map, panel, ui, store, audio } = ctx;
+  const { engine, leaves, busInfo, europe, model, map, panel, ui, store, audio } = ctx;
   const list = $('#route-list'), title = $('#result-title'), chip = $('#eu-chip'), btn = $('#btn-replay'), poster = $('#poster-line');
   const all = new Set(map.codes);
-  const name = (c) => chart.leaves[c].english;
+  const name = (c) => leaves[c].english;
   const lineName = (c) => europe.lines[europe.stations[c].line]?.name;
   let active = false, token = 0, timer = 0;
   let r = null; // { text, steps, hits, win, p, runner, posterLeaf, back }
@@ -46,7 +46,7 @@ export function createDetect(ctx, replay) {
 
   function foundLine() {
     const run = r.runner ? ` <span class="muted">· or ${ui.esc(name(r.runner.lang))} (${sure(r.runner.p)})</span>` : '';
-    return `${ui.flagHtml(r.win)}<span>${provisional ? 'Leaning to' : 'Found'} <b>${ui.esc(name(r.win))}</b> <span class="muted">· ${sure(r.p)} sure</span>${run}${provisional ? '<br><span class="hint">Keep typing, or press Finish.</span>' : ''}</span>${provisional ? '<button type="button" class="btn btn-small" data-finish>Finish</button>' : '<button type="button" class="btn btn-small" data-card>Card</button>'}`;
+    return `${ui.flagHtml(r.win)}<span>${provisional ? 'Leaning to' : 'Found'} <b>${ui.esc(name(r.win))}</b> <span class="muted">· ${sure(r.p)} sure${busInfo(r.win) ? ` (${ui.esc(busInfo(r.win).stop)})` : ''}</span>${run}${provisional ? '<br><span class="hint">Keep typing, or press Finish.</span>' : ''}</span>${provisional ? '<button type="button" class="btn btn-small" data-finish>Finish</button>' : '<button type="button" class="btn btn-small" data-card>Card</button>'}`;
   }
   function setTitle() { title.innerHTML = r ? `<span class="found-line">${foundLine()}</span>` : 'Questions'; }
 
@@ -60,8 +60,8 @@ export function createDetect(ctx, replay) {
     if (end) {
       map.setOut(finalKeep());
       map.mark(r.win, 'lit', true);
-      const lf = chart.leaves[r.win];
-      chip.innerHTML = `<span class="eu-found">${ui.flagHtml(r.win)}<span><b>${ui.esc(lf.english)}</b> · ${sure(r.p)} sure<br><span class="hint">${ui.esc(lf.label.split(' / ')[0])}</span></span></span>`;
+      const lf = leaves[r.win], bi = busInfo(r.win);
+      chip.innerHTML = `<span class="eu-found">${ui.flagHtml(r.win)}<span><b>${ui.esc(lf.english)}</b> · ${sure(r.p)} sure<br><span class="hint">${ui.esc(lf.label.split(' / ')[0])}${bi ? ` · ${ui.esc(bi.stop)}` : ''}</span></span></span>`;
       return;
     }
     map.setOut(i < 0 ? null : keepAt(i));

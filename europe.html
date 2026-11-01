@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Europe line map · Which European language am I reading? · Daniel Pradilla</title>
-  <meta name="description" content="The 106 languages of the 'Which European language am I reading?' chart as a metro map of Europe, one line per language family. Explore, detect a text's language and replay the route, or guess where a text is spoken.">
+  <meta name="description" content="The 106 languages of the 'Which European language am I reading?' chart as a metro map of Europe, one line per language family, plus 32 regional languages on bus routes. Explore, detect a text's language and replay the route, or guess where a text is spoken.">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-XYG5QF5DZL"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -14,10 +14,10 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="game-style.css?v=20261101l">
+  <link rel="stylesheet" href="game-style.css?v=20261101n">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700&family=Noto+Sans+Armenian:wght@700&family=Noto+Sans+Georgian:wght@700&family=Noto+Sans+Hebrew:wght@700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=20261101l">
-  <script type="module" src="src/europe/main.js?v=20261101l"></script>
+  <link rel="stylesheet" href="styles.css?v=20261101n">
+  <script type="module" src="src/europe/main.js?v=20261101n"></script>
 </head>
 <body>
   <svg class="ink-defs" aria-hidden="true" focusable="false">
@@ -98,7 +98,7 @@
 
     <div class="app-head">
       <h1>Which European language am I reading?</h1>
-      <p class="muted lede">The Europe map: 106 languages as stations, one line per language family.</p>
+      <p class="muted lede">The Europe map: 106 languages as metro stations, one line per language family, and 32 regional languages as bus stops.</p>
     </div>
 
     <div class="toolbar">
@@ -108,7 +108,7 @@
         <button type="button" data-mode="guess" aria-pressed="false"><kbd>3</kbd> Guess</button>
       </div>
       <div class="tools">
-        <button class="btn btn-small" type="button" id="btn-collection">Collection <span class="num" id="coll-count">0/106</span></button>
+        <button class="btn btn-small" type="button" id="btn-collection">Collection <span class="num" id="coll-count">0/138</span></button>
         <button class="btn btn-small" type="button" id="btn-options">Options</button>
         <button class="btn btn-small" type="button" id="btn-about">About</button>
       </div>
@@ -119,7 +119,7 @@
     <section class="panel board-panel" aria-label="Europe line map">
       <div class="hud" id="hud" hidden></div>
       <div class="board-wrap" id="board-wrap">
-        <div id="board" tabindex="0" role="application" aria-label="Europe line map with 106 language stations. Use the arrow keys to move between neighbouring stations, Enter to open one, O for an overview, plus and minus to zoom."></div>
+        <div id="board" tabindex="0" role="application" aria-label="Europe line map with 106 language stations and 32 regional bus stops. Use the arrow keys to move between neighbouring stations, Enter to open one, O for an overview, plus and minus to zoom."></div>
         <svg id="minimap" aria-hidden="true"></svg>
         <div class="board-tools">
           <label class="choice board-map"><input class="toggle" type="checkbox" role="switch" id="board-map"> Map</label>
@@ -243,6 +243,7 @@
 
       <h3>What this map shows</h3>
       <p>The <a href="./">poster</a> sorts the 106 languages by the <em>letters</em> they use. This page draws the same 106 languages as a metro map shaped roughly like Europe. Each station is a language with its flag and its own name, and each line is a language <em>family</em>: Indo-European languages get one line per branch (Romance, Germanic, Slavic&hellip;), the other families get one line each. Branches of a line fork like metro lines.</p>
+      <p><strong>Bus routes.</strong> Metro is the poster&rsquo;s 106 languages. Bus is 32 regional languages that are not on the poster, such as Sicilian, Venetian, Asturian, Low German, Scots or Silesian. A bus route starts at the station it connects to. When it ends at a second station, the regional language sits between those two main languages; the route does not say that it comes from either. The poster page never shows them, and its model never chooses them.</p>
       <p>Dashed walkways join neighbouring stations of different lines where people live side by side, such as Basque with Spanish and French or Maltese with Italian. They show language contact and say nothing about kinship. Esperanto has no homeland, so it sits in a dashed ring in the middle. Romani is spoken across Europe: its two stations sit in central Europe and in the Balkans, on the Indo-Iranian line that continues to Ossetian in the Caucasus.</p>
       <p>Where the letter chart and the family map disagree is the interesting part. Finnish, Estonian and Hungarian are relatives, yet the poster puts them far apart because of their letters. Detect replays the poster's route on this map, one letter question at a time, so you can watch the letters cut across families and geography.</p>
 

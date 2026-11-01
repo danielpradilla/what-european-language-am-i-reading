@@ -7,6 +7,7 @@ const read = (p) => JSON.parse(readFileSync(new URL(p, import.meta.url)));
 const model = createModel(read('../src/data/model.json'));
 const fixture = read('./model-fixture.json');
 const samples = read('../data/samples.json');
+const euSamples = read('../data/europe-samples.json');
 
 test('JS features and scores match the Python model on the fixture', () => {
   assert.equal(fixture.length, 30);
@@ -23,6 +24,23 @@ test('at least 90 of the 97 samples are identified', () => {
   console.log(`samples identified: ${ok}/${samples.length}`);
   assert.equal(samples.length, 97);
   assert.ok(ok >= 90, String(ok));
+});
+
+test('every Europe sample (regional languages) is identified as its own language', () => {
+  assert.equal(euSamples.length, 32);
+  for (const s of euSamples) assert.equal(model.verdict(s.text).ranking[0].lang, s.lang, s.lang);
+});
+
+test('verdict `only` restricts the ranking to the allowed languages and renormalises', () => {
+  const text = 'el gat es a la casa i no vol menjar res perquè no té gana';
+  const only = new Set(['spa', 'ita', 'fra', 'por']);
+  const all = model.verdict(text), some = model.verdict(text, { only });
+  assert.equal(some.grams, all.grams);
+  assert.equal(some.ranking.length, 4);
+  assert.ok(some.ranking.every((r) => only.has(r.lang)));
+  assert.ok(Math.abs(some.ranking.reduce((a, r) => a + r.p, 0) - 1) < 1e-9);
+  assert.ok(some.ranking.every((r, i) => i === 0 || some.ranking[i - 1].p >= r.p));
+  assert.deepEqual(model.verdict('123 !!', { only }).ranking, []);
 });
 
 test('questions narrow the languages down and the asked grams are real', () => {
