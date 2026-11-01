@@ -5,7 +5,7 @@ export const U = 36; // world units per grid unit
 const X0 = -2, Y0 = -2, X1 = 56, Y1 = 43; // grid window drawn
 export const WORLD = { w: (X1 - X0) * U, h: (Y1 - Y0) * U };
 const FLAG = 26, HALF = FLAG / 2, FS = 11.5;
-const FB = 22, HB = FB / 2; // a bus stop is a smaller, rounded flag with a BUS plate
+const FB = 22, HB = FB / 2; // a bus stop is a smaller, rounded flag in a ring of its route's colour
 const SEAS = [ // scenery names, grid positions
   ['Atlantic Ocean', 0, 19, -8], ['North Sea', 14.5, 9.2, 0], ['Baltic Sea', 26.5, 12.4, 0], ['Mediterranean Sea', 15.5, 37.8, 0],
   ['Black Sea', 38, 32.6, 0], ['Caspian Sea', 52.4, 29.5, -70], ['Norwegian Sea', 15.5, 1.2, 0],
@@ -92,16 +92,14 @@ export function createEuropeMap({ svg, mini, wrap, europe, leaves, flags, aspect
     }
   }
 
-  // ---------- bus routes: under the metro lines, thinner, with a dashed centre line ----------
+  // ---------- bus routes: under the metro lines, one thin solid line in the family colour, no ink casing ----------
   for (const [id, b] of Object.entries(buses)) {
     const g = el('g', { class: 'eu-bus', 'data-line': `bus:${id}` }, gBus);
     byLine[`bus:${id}`] = [g];
     for (const s of b.segments) {
       const sg = el('g', { class: 'eu-seg' }, g);
       const d = polyD(s.pts.map(P));
-      el('path', { d, class: 'eu-bus-ink' }, sg);
       el('path', { d, class: 'eu-bus-fill', stroke: L[b.line].colour }, sg);
-      el('path', { d, class: 'eu-bus-mid' }, sg);
       segEls.push({ s, g: sg });
     }
   }
@@ -129,11 +127,6 @@ export function createEuropeMap({ svg, mini, wrap, europe, leaves, flags, aspect
     drawFlag(bus ? el('g', { 'clip-path': 'url(#eu-bus-clip)' }, body) : body, info, F, aspect);
     el('rect', { x: -H, y: -H, width: F, height: F, rx, class: 'eu-fog' }, body);
     el('rect', { x: -H, y: -H, width: F, height: F, rx, class: 'eu-frame' }, body);
-    if (bus) {
-      const plate = el('g', { class: 'eu-bus-plate' }, body);
-      el('rect', { x: -11, y: H - 1, width: 22, height: 9, rx: 3 }, plate);
-      el('text', { x: 0, y: H + 6.2, 'text-anchor': 'middle' }, plate).textContent = 'BUS';
-    }
     el('rect', { x: -H - 3, y: -H - 3, width: F + 6, height: F + 6, class: 'eu-hit' }, g);
     stEls[c] = { g, label: null };
     (byLine[lineOf(c) ?? 'none'] ??= []).push(g);
@@ -197,7 +190,7 @@ export function createEuropeMap({ svg, mini, wrap, europe, leaves, flags, aspect
     const p = placed[it.id];
     const anchor = { r: 'start', tr: 'start', br: 'start', l: 'end', tl: 'end', bl: 'end' }[p.side] ?? 'middle';
     const tx = anchor === 'start' ? p.x : anchor === 'end' ? p.x + p.w : p.x + p.w / 2;
-    const t = el('text', { class: 'eu-lbl', 'text-anchor': anchor, 'data-st': it.id, 'data-line': lineOf(it.id) ?? 'none', 'font-size': FS }, gLbl);
+    const t = el('text', { class: S[it.id].bus ? 'eu-lbl eu-lbl-bus' : 'eu-lbl', 'text-anchor': anchor, 'data-st': it.id, 'data-line': lineOf(it.id) ?? 'none', 'font-size': FS }, gLbl);
     it.lines.forEach((l, i) => { el('tspan', { x: f1(tx), y: f1(p.y + FS * 0.92 + i * FS * 1.12) }, t).textContent = l; });
     stEls[it.id].label = t;
     (byLine[lineOf(it.id) ?? 'none'] ??= []).push(t);

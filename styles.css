@@ -315,13 +315,8 @@ button.stage-card { font: inherit; text-align: left; background: none; border: 0
 .eu-line-fill { stroke-width: 7; }
 .eu-line { cursor: pointer; }
 .eu-bus { cursor: pointer; }
-.eu-bus-ink, .eu-bus-fill, .eu-bus-mid { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.eu-bus-ink { stroke: var(--ink); stroke-width: 8.6; }
-.eu-bus-fill { stroke-width: 5; }
-.eu-bus-mid { stroke: var(--card); stroke-width: 1.5; stroke-dasharray: 3 5; }
+.eu-bus-fill { fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
 .eu-bus-ring { stroke: var(--ink); stroke-width: 1.6; }
-.eu-bus-plate rect { fill: var(--ink); }
-.eu-bus-plate text { font: 800 6.4px var(--font-ui); letter-spacing: 0.08em; fill: var(--card); pointer-events: none; }
 .eu-seg.out { opacity: 0.12; }
 .eu-walk-ink, .eu-walk { fill: none; }
 .eu-walk-ink { stroke: var(--ink); stroke-width: 5.4; stroke-dasharray: 6 4; }
@@ -338,6 +333,7 @@ button.stage-card { font: inherit; text-align: left; background: none; border: 0
 .eu-st:focus-visible .eu-frame { stroke: var(--cobalt); stroke-width: 3.2; stroke-dasharray: 5 3; }
 .eu-lbl { font-family: var(--noto); font-weight: 700; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 3.2px; stroke-linejoin: round; cursor: pointer; }
 .eu-st.out, .eu-lbl.out { opacity: 0.16; }
+.eu-lbl-bus { font-weight: 400; }
 .eu-st.out .eu-fog { opacity: 1; }
 .eu-st.lit, .eu-st.ans, .eu-st.bad, .eu-st.sel, .eu-lbl.lit, .eu-lbl.ans, .eu-lbl.bad, .eu-lbl.sel { opacity: 1; }
 .eu-st.lit .eu-body, .eu-st.ans .eu-body { transform: scale(1.45); }
@@ -373,7 +369,7 @@ svg.z-lo .eu-tag { display: none; }
 .li-check { padding: 6px 8px; background: var(--paper-deep); border-left: 4px solid var(--marigold); }
 .swatch { display: inline-block; flex: none; width: 24px; height: 11px; vertical-align: middle; background: var(--c); border: 2px solid var(--ink); border-radius: 6px; }
 .swatch-none { background: var(--card); border-style: dashed; }
-.swatch-bus { height: 8px; border-radius: 3px; background-image: repeating-linear-gradient(90deg, transparent 0 4px, var(--card) 4px 6px); background-size: 100% 2px; background-repeat: repeat-x; background-position: center; }
+.swatch-bus { height: 4px; border: 0; border-radius: 2px; box-shadow: none; } /* thin solid line, like the bus routes */
 .lede-side { margin: 0; }
 .legend { display: grid; gap: 8px; padding-top: 8px; }
 .legend-sum { cursor: pointer; font: 800 1.2rem var(--font-display); }
