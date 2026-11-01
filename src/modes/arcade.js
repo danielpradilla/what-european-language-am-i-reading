@@ -15,6 +15,7 @@ export function createArcade(ctx, steer) {
   let paused = false;
   let left = 8, limit = 8;
   let timerId = 0, autoId = 0, lastTick = 0;
+  let kept = ''; // the player's own text from Detect, put back when they leave Arcade
 
   const limitFor = (level) => Math.max(3, 8 - 0.5 * (level - 1));
   const mult = () => 1 + Math.floor(run.streak / 5);
@@ -70,7 +71,7 @@ export function createArcade(ctx, steer) {
     ui.clearNotice('steer');
     board.clearRoute(); board.clearMarks(); board.setExtra(0);
     board.teleport(...board.nodePos(chart.root)); board.here(chart.root); board.setFollow(true);
-    panel.clearAll(); panel.setEditable(false);
+    panel.setEditable(false); ctx.setMeta(null); panel.setText(''); // no leftover text from Detect before the first round
   }
 
   function startRun() {
@@ -96,6 +97,7 @@ export function createArcade(ctx, steer) {
     btnNext.hidden = true;
     const s = pickSample();
     ctx.autoSampleText = s.text; // picked by the game, so Detect will not reuse it
+    ctx.setMeta(ctx.sampleMeta(s)); // CC BY-SA and other sources need their attribution under the text
     panel.setText(s.text);
     steer.start(s.text, { keepSnake: true });
     btnHint.hidden = false;
@@ -205,6 +207,7 @@ export function createArcade(ctx, steer) {
   return {
     enter() {
       active = true;
+      kept = ctx.autoSampleText === panel.text() ? '' : panel.text(); // the player's own Detect text comes back after Arcade
       steer.setArcade(hooks);
       steer.enter();
       hud.hidden = false;
@@ -215,6 +218,7 @@ export function createArcade(ctx, steer) {
       run = null; steer.exit(); steer.setArcade(null);
       hud.hidden = true; hud.innerHTML = '';
       panel.setEditable(true);
+      ctx.autoSampleText = null; ctx.setMeta(null); panel.setText(kept); kept = '';
     },
     onText() {},
     key(e) {

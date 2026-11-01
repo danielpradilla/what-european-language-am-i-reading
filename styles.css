@@ -143,7 +143,10 @@ body { overflow-x: clip; }
 .tp-wrap { position: relative; }
 .tp-edit { height: 190px; overflow: auto; padding: 12px 14px; white-space: pre-wrap; overflow-wrap: anywhere; font: 500 1rem/1.6 var(--noto); color: var(--ink); background: var(--card); border: var(--line) solid var(--ink); border-radius: var(--cut); box-shadow: inset 3px 3px 0 var(--paper-deep); outline-offset: 3px; }
 .tp-edit:empty::before { content: attr(data-placeholder); color: var(--ink-faint); }
-.tp-edit[contenteditable="false"] { background: var(--hatch), var(--paper-deep); background-blend-mode: multiply; cursor: default; }
+/* Read-only (Arcade, Guess): the text still has to be read, so keep the plain card, just without the input well. */
+.tp-edit[contenteditable="false"] { box-shadow: none; cursor: default; }
+.tp-edit[contenteditable="false"]:empty::before { content: "The text for each round appears here."; }
+[data-mode="arcade"] #btn-sample, [data-mode="arcade"] #btn-clear { display: none; }
 .tp-badges { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .tp-badge { position: absolute; display: grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; font: 900 0.7rem/1 var(--font-ui); --mono: 1; color: var(--ink); background: var(--card); border: var(--line-fine) solid var(--ink); border-radius: 9px; white-space: nowrap; }
 .tp-badge.is-label { border-radius: 4px; color: var(--card); background: var(--red); }
