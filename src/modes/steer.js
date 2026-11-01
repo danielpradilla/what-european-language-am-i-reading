@@ -49,7 +49,7 @@ export function createSteer(ctx) {
     const seq = s.test.join(' ');
     padQ.innerHTML = `<span>Has <b>${E(seq)}</b>?</span>`; // the snake's head covers the station, so the question sits on the pad too
     const seqs = s.test.map((q) => `<span class="big-seq"><span class="g">${E(q)}</span><code>${E(codePoints(q))}</code></span>`).join('');
-    bubble.innerHTML = `Does the text contain any of these?<div class="big-seqs">${seqs}</div>${leadsTo(s.yes, 'Y', o.y.dir)}${leadsTo(s.no, 'N', o.n.dir)}`;
+    bubble.innerHTML = `This stop asks: does the text have any of these letters?<div class="big-seqs">${seqs}</div>${leadsTo(s.yes, 'Y', o.y.dir)}${leadsTo(s.no, 'N', o.n.dir)}`;
   }
 
   function after() {
