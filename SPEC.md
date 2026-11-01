@@ -35,10 +35,10 @@ The About panel also credits the earlier versions in the table above, and `CREDI
 
 Goals:
 
-1. A game. Built-in text snippets, a snake you steer through the chart, score, lives and a high-score table.
-2. An explorable maze. You move the snake head through the whole chart with the arrow keys, swipes or taps and read what each station tests.
+1. A game (Arcade). Built-in text snippets, a snake you steer through the chart, score, lives and a high-score table.
+2. An explorable chart (Steer). You move the snake head through the whole chart with the arrow keys, swipes or taps and read what each station tests.
 3. A detection tool. You paste text, type, or give a URL. The app follows the chart's rules exactly, draws the route and highlights the letters in the text that decided each turn.
-4. A self-test. You paste text (or a URL) and steer the snake yourself. A wrong turn shows an error and highlights the character you missed.
+4. Arcade is also the self-test: you steer the snake through a sample text and a wrong turn shows an error and highlights the character you missed.
 5. A snake game drawn in the danielpradilla game style (1930s rubber-hose animation and comic print), on the chart's own metro layout with its square flags.
 6. Works with a keyboard on desktop and with touch on a phone.
 
@@ -135,7 +135,7 @@ Detect mode includes a "Why not…?" panel (section 6.2) that shows the letter t
 
 ## 4. Text sources
 
-All modes except Maze take text from one input panel.
+Detect and Arcade take text from one input panel (read-only in Arcade). Steer has no text.
 
 ### 4.1 Paste and typing
 
@@ -199,7 +199,7 @@ The board is SVG, one `<g>` per station and terminal and one `<path>` per edge, 
 - Stations: `--card` circles with a `--line` ink outline through the `#ink-wobble` filter, with the test sequences in ink. The station the snake is on gets a `--line-heavy` outline.
 - Terminals: the flag in its own colours inside a square ink frame (`--line-heavy`, hard `4px 4px 0` shadow), with the chart label underneath in Sansita 700.
 - Snake: the player character, so it uses `--pink`, the colour the guide reserves for characters. Rounded segments with an ink outline and a halftone shade on the lower right (light from the top left). The rubber-hose head has eyes that face the direction of travel and squashes and stretches by up to 10% on turns.
-- Growth, the same in every mode, like the classic snake game: the tail stays where it is while the head moves, so the snake keeps growing by exactly the distance it travels, and eating letters at a Y station adds two more segments. The body covers the whole way back to `F G R` (cap: 400 segments). Maze: going back along a line retracts the body over that line. Detect: when live typing reruns the route from a later step, the body is restored along the earlier steps. Arcade keeps the length between rounds and still loses 3 segments per wrong turn.
+- Growth, the same in every mode, like the classic snake game: the tail stays where it is while the head moves, so the snake keeps growing by exactly the distance it travels, and eating letters at a Y station adds two more segments. The body covers the whole way back to `F G R` (cap: 400 segments). Steer: going back along a line retracts the body over that line. Detect: when live typing reruns the route from a later step, the body is restored along the earlier steps. Arcade keeps the length between rounds and still loses 3 segments per wrong turn.
 - Route highlighting: each colour keeps the one meaning the guide gives it.
   - Letters that answered Y get the marigold highlighter (`.swipe`) in the text panel, and their station gets a marigold ring.
   - The board, the route list and the text show the same step-number badge (Recursive 900), which links them.
@@ -210,7 +210,7 @@ The board is SVG, one `<g>` per station and terminal and one `<path>` per edge, 
 
 ### 5.3 Movement and camera
 
-The snake moves one sub-cell per tick (25 ms by default, faster at higher Arcade levels). At a station it stops and waits for a choice (Maze, Steer, Arcade) or continues on its own (Detect playback).
+The snake moves one sub-cell per tick (25 ms by default, faster at higher Arcade levels). At a station it stops and waits for a choice (Steer, Arcade) or continues on its own (Detect playback).
 
 The camera follows the head with easing. `O` or the overview button fits the whole chart on screen. Zoom with pinch, Ctrl + wheel, the scroll wheel once the board has focus (click or tab into it; the page scrolls normally otherwise), or `+` and `-`. A minimap in the corner shows the head's position on the whole chart.
 
@@ -232,18 +232,18 @@ Station letters use Noto Sans Bold in every script, including Latin, so that all
 
 ## 6. Modes
 
-A tab bar switches modes (keys `1` to `4`). Every mode uses the same board.
+A tab bar switches modes (keys `1` to `3`): Steer, Detect and Arcade. Every mode uses the same board.
 
-### 6.1 Maze
+### 6.1 Steer
 
-Free exploration with no text.
+Free exploration with no text box. The player moves the snake through the whole chart and the snake's `.dialogue` bubble tells what each station tests.
 
-- The snake starts at `F G R`. An arrow key moves along the line that leaves the current station in that direction. The arrow pointing back along the line the snake came in on, or Backspace, goes back one station, and the snake shrinks.
-- `Y` and `N` keys take the yes or no line whatever its direction.
-- Tapping a station connected to the head's station moves there.
-- The station panel shows the sequences in large type with their code points, and lists the languages reachable on each line: "Y leads to 3 languages: Czech, Lower Sorbian, Upper Sorbian."
-- Reaching a terminal opens its language card (section 7.1).
-- Reaching a terminal adds its flag to the collection (section 7.2).
+- The snake starts at `F G R` and stops at every station. An arrow key moves along the line that leaves the current station in that direction. Arrow keys follow the chart's geometry, so the player has to read the Y and N labels, as on the poster. The arrow pointing back along the line the snake came in on, or Backspace, goes back one station, and the snake shrinks.
+- `Y` and `N` keys take the yes or no line whatever its direction. A swipe moves like an arrow key. Tapping a station connected to the head's station moves there.
+- The on-screen pad sits over the board on every screen size. It has Y and N buttons that show an arrow for the direction each line leaves the current station, a question card ("Has č?") above them, and a Back button. Back is disabled at `F G R`. At a flag the Y and N buttons are hidden and Back stays.
+- The bubble shows the station's sequences in large type with their code points, then the languages reachable on each line: "Y (left) leads to 3 languages: Czech, Lower Sorbian, Upper Sorbian." A list of more than 8 languages is cut to 8 and ends "and N more".
+- Reaching a flag adds it to the collection (section 7.2), reveals it on the board and opens its language card (section 7.1). The bubble shows the language name, "New flag!" when the flag is new, and an "Open language card" button (also Enter). Going back from a flag keeps it in the collection.
+- There is no hint, no score and no "next round".
 
 ### 6.2 Detect (paste, type or URL)
 
@@ -254,22 +254,18 @@ Free exploration with no text.
 - While the player types, the route is provisional. The title reads "Heading to Bulgarian · keep typing" with a Finish button, and there is no "Found!" burst, fanfare or new flag. The route is confirmed when the player pauses for 2 s with at least 30 letters, presses Finish, or presses Enter on the board. With fewer than 30 letters a pause shows "Keep typing" and the letter count instead. Pasted, fetched and sample texts are confirmed as soon as the snake arrives. A confirmed route stays confirmed while further typing does not change it.
 - "Why not…?": the player picks any language from a searchable list. The app runs `diverge` and reports the first step where the text and that language's route disagree: "Czech needs ů at step 7. Your text has none." or "Your text contains ä (line 2), and Czech's route needs N there."
 
-### 6.3 Steer
+### 6.3 Arcade
 
-The player finds the route for a text (pasted, fetched from a URL, or a sample) by moving the snake.
+The text-based steering game, with samples, a clock and a score. The screens use the game style's game UI components.
 
-- At each station the snake stops. The player picks a line with the arrow keys, the `Y`/`N` keys, a swipe, a tap on the next station, or the on-screen Y and N buttons. The Y and N buttons sit over the board in Steer and Arcade on every screen size, and show an arrow for the direction each line leaves the current station. Arrow keys follow the chart's geometry, so the player has to read the Y and N labels, as on the poster.
+- The player finds the route for a sample text by moving the snake. At each station the snake stops, and the player picks a line with the arrow keys, the `Y`/`N` keys, a swipe, a tap on the next station, or the on-screen Y and N buttons (no Back button).
 - A correct choice moves the snake on and lengthens it (section 5.2). On a Y, the matching letters get the marigold highlighter and fly into the snake's head before it grows.
-- A wrong choice: the head bumps into a wall (screen shake if enabled, red flash, buzz) and the error count goes up. The snake explains the mistake in a `.dialogue` bubble with its own portrait, and the text panel shows the evidence:
+- A wrong choice: the head bumps into a wall (screen shake if enabled, red flash, buzz) and the error count goes up. The snake explains the mistake in its bubble, and the text panel (read-only in Arcade) shows the evidence:
   - The answer was Y and the player chose N: all occurrences are highlighted in red, the panel scrolls to the first one, and a callout points at it: "ä, character 87 (line 3, column 12)."
   - The answer was N and the player chose Y: the text has no character to highlight. The station's letters are struck through on the board and a banner says "None of ő ű appear in the text."
 - After a wrong choice that line is blocked, and the player has to take the correct one before the snake moves on.
-- `H` (hint) answers the current station for the player: it highlights the occurrences in the text, or shows "none found". In Steer a hint counts as half an error; in Arcade it costs points.
+- `H` (hint) answers the current station for the player: it highlights the occurrences in the text, or shows "none found". It costs points.
 - At the terminal: the language card, the error count, time taken, and a replay that shows the correct route next to the player's moves.
-
-### 6.4 Arcade
-
-Steer with samples, a clock and a score. The screens use the game style's game UI components.
 
 - A run is a series of rounds. Each round loads a random sample from `data/samples.json` that has not appeared in the current run.
 - HUD (`.hud` with `.hud-chip`s, wrapping on narrow screens):
@@ -304,7 +300,7 @@ Shown when the snake reaches a terminal, and from the collection:
 
 ### 7.2 Collection
 
-A grid of all 106 flags as the game style's stage cards. A language not yet reached is `.is-locked` (hatched, labelled "Not found yet"). A language the snake has reached in any mode (Maze, Detect, Steer or Arcade) is `.is-cleared`, with the flag in colour and the date it was first reached. The language just found is `.is-current`. Each new flag also raises an achievement toast. Stored in `localStorage` with a reset button.
+A grid of all 106 flags as the game style's stage cards. A language not yet reached is `.is-locked` (hatched, labelled "Not found yet"). A language the snake has reached in any mode (Steer, Detect or Arcade) is `.is-cleared`, with the flag in colour and the date it was first reached. The language just found is `.is-current`. Each new flag also raises an achievement toast. Stored in `localStorage` with a reset button.
 
 ### 7.3 About panel
 
@@ -312,25 +308,25 @@ Shows the credit from section 1.1 with links to both authors and to the earlier 
 
 ## 8. Controls
 
-| Input | Maze | Detect | Steer and Arcade |
+| Input | Steer | Detect | Arcade |
 |---|---|---|---|
 | Arrow keys, WASD, swipe | follow the line in that direction; back along the incoming line | (none) | choose the line in that direction |
 | `Y`, `N` | take the Y or N line | (none) | answer Y or N |
 | Backspace | back one station | (none) | (none) |
 | Tap a connected station | move there | (none) | choose that line |
-| Enter | (none) | replay route | (none) |
+| Enter | open the language card at a flag | replay route | start run, next round |
 | `H` | (none) | (none) | hint |
-| Space | (none) | (none) | pause (Arcade) |
+| Space | (none) | (none) | pause |
 | `O` | overview | overview | overview |
 | `M` | mute | mute | mute |
-| `1` to `4` | switch mode | switch mode | switch mode |
+| `1` to `3` | switch mode | switch mode | switch mode |
 | Esc | close panel | close panel | close panel, pause |
 
 Board keys act only when the text panel does not have focus. On touch screens an on-screen pad with Y, N and Back buttons sits over the bottom corner of the board.
 
 ## 9. Screen layout
 
-The first screen is Detect with an empty text box and the snake waiting at `F G R`. Nothing is routed until the player types, pastes, fetches a URL or presses "Try a sample". A sample that Steer or Arcade loaded on its own is not carried into Detect; text the player chose is.
+The first screen is Detect with an empty text box and the snake waiting at `F G R`. Nothing is routed until the player types, pastes, fetches a URL or presses "Try a sample". A sample that Arcade loaded on its own is not carried into Detect; text the player chose is. The old `#maze` address opens Steer.
 
 - Desktop (≥ 900 px wide): the compact site bar (section 12.3). Below it, the project header with the h1 "Which European language am I reading?" (Sansita 900). Below that, the mode tabs as a `.segmented` control, with collection, options and about buttons. The board takes about 60% of the width on the left; the text panel and route list sit on the right.
 - Phone: the compact site bar with its hamburger menu (drawn above the board and its tools), then a smaller project header, the mode tabs and smaller board tools. The board fills the space above the bottom sheet, and the on-screen pad sits over the board. The bottom sheet has three heights: collapsed to its handle (the board grows to fill the screen), peek (30% of the screen, the default) and open (88%). Tapping the handle cycles collapsed, peek, open; dragging it moves one step up or down. Touch targets on the board are at least 34 px and the pad stays at 60 px. There is no horizontal page scroll, and HUD chips wrap.
@@ -364,9 +360,9 @@ src/
   board.js               SVG render, snake, camera, minimap
   text-panel.js          contenteditable, Highlight API, offset mapping
   url-text.js            calls api/fetch.php, HTML to text
-  modes/maze.js
+  modes/steer.js         free exploration (Steer)
   modes/detect.js
-  modes/steer.js         also used by Arcade
+  modes/rounds.js        text round engine used by Arcade
   modes/arcade.js
   audio.js
   storage.js             collection, settings, high scores
@@ -453,10 +449,10 @@ The station `ǧ õ å` (Skolt Sami) has no `ŋ` on this version. The January 202
 ## 15. Milestones
 
 1. Engine, `chart.json` logic, station cells and line paths, tests (section 12.1).
-2. Board rendering and Maze mode.
+2. Board rendering and Steer mode.
 3. Text panel, Detect mode with live typing and "Why not…?".
 4. `fetch.php` and URL input.
-5. Steer mode with error highlighting.
+5. Round engine with error highlighting.
 6. Arcade, collection, sound.
 7. Flags, Noto glyph check, game-style components added to the guide's `index.html`, options menu, accessibility pass, phone layout, compact site bar and GA4 tag.
 8. Publish: GitHub repository, deploy to `/projects/what-european-language-am-i-reading/`, catalog card (sections 12.2 and 12.3).

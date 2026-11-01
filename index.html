@@ -16,8 +16,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="game-style.css?v=20261031y">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700&family=Noto+Sans+Armenian:wght@700&family=Noto+Sans+Georgian:wght@700&family=Noto+Sans+Hebrew:wght@700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=20261031y">
-  <script type="module" src="src/main.js?v=20261031y"></script>
+  <link rel="stylesheet" href="styles.css?v=20261101a">
+  <script type="module" src="src/main.js?v=20261101a"></script>
 </head>
 <body>
   <svg class="ink-defs" aria-hidden="true" focusable="false">
@@ -98,15 +98,14 @@
 
     <div class="app-head">
       <h1>Which European language am I reading?</h1>
-      <p class="muted lede">Paste a text and watch the snake follow the letters through the metro map, or steer it yourself.</p>
+      <p class="muted lede">Walk the snake through the metro map to see which letters lead to which language, or paste a text and watch it follow the letters.</p>
     </div>
 
     <div class="toolbar">
       <div class="segmented" id="tabs" role="group" aria-label="Mode">
-        <button type="button" data-mode="maze" aria-pressed="false"><kbd>1</kbd> Maze</button>
+        <button type="button" data-mode="steer" aria-pressed="false"><kbd>1</kbd> Steer</button>
         <button type="button" data-mode="detect" aria-pressed="true"><kbd>2</kbd> Detect</button>
-        <button type="button" data-mode="steer" aria-pressed="false"><kbd>3</kbd> Steer</button>
-        <button type="button" data-mode="arcade" aria-pressed="false"><kbd>4</kbd> Arcade</button>
+        <button type="button" data-mode="arcade" aria-pressed="false"><kbd>3</kbd> Arcade</button>
       </div>
       <div class="tools">
         <button class="btn btn-small" type="button" id="btn-collection">Collection <span class="num" id="coll-count">0/106</span></button>
@@ -120,7 +119,7 @@
     <section class="panel board-panel" aria-label="Chart">
       <div class="hud" id="hud" hidden></div>
       <div class="board-wrap" id="board-wrap">
-        <div id="board" tabindex="0" role="application" aria-label="Language chart. In Maze and Steer, use the arrow keys or Y and N to move the snake. Press O for an overview."></div>
+        <div id="board" tabindex="0" role="application" aria-label="Language chart. In Steer and Arcade, use the arrow keys or Y and N to move the snake. Press O for an overview."></div>
         <svg id="minimap" viewBox="0 0 1024 724" aria-hidden="true"></svg>
         <div class="board-tools">
           <button class="btn btn-small" type="button" id="btn-overview" title="Overview (O)">Overview</button>
@@ -142,7 +141,7 @@
       <div class="side-body" id="side-body">
         <div id="notices" class="notices"></div>
 
-        <section id="sec-text" data-modes="detect steer arcade">
+        <section id="sec-text" data-modes="detect arcade">
           <div class="row">
             <span class="label" id="text-label">Text</span>
             <span class="sp"></span>
@@ -173,8 +172,6 @@
           <datalist id="why-list"></datalist>
           <div id="why-out" class="why-out" aria-live="polite"></div>
         </section>
-
-        <section id="sec-station" data-modes="maze"></section>
 
         <section id="sec-steer" data-modes="steer arcade">
           <div class="dialogue">
@@ -263,7 +260,7 @@
         <li>A station says yes when the text contains at least one of its letters. Upper and lower case count the same.</li>
         <li>Letters match whole: a decomposed <code>a</code> + U+0308 counts as <code>ä</code>, but <code>r</code> does not match the base of a decomposed <code>ř</code>.</li>
         <li>Only three variants are folded: <code>c'h</code> with <code>c’h</code> or <code>cʼh</code>; <code>l·l</code> with <code>l‧l</code> or <code>ŀl</code>; the palochka <code>ӏ</code> with <code>Ӏ</code>.</li>
-        <li>Nothing else is folded. Turkish <code>ş</code> is not Romanian <code>ș</code>. Latin <code>ə</code> is not Cyrillic <code>ә</code>. Latin <code>i</code>, <code>j</code> are not Cyrillic <code>і</code>, <code>ј</code>. Many Caucasian texts type the palochka as Latin <code>I</code>, <code>l</code> or digit <code>1</code>; those do not match. Station panels in Maze show the code points.</li>
+        <li>Nothing else is folded. Turkish <code>ş</code> is not Romanian <code>ș</code>. Latin <code>ə</code> is not Cyrillic <code>ә</code>. Latin <code>i</code>, <code>j</code> are not Cyrillic <code>і</code>, <code>ј</code>. Many Caucasian texts type the palochka as Latin <code>I</code>, <code>l</code> or digit <code>1</code>; those do not match. In Steer the snake shows the code points of each station.</li>
         <li>Text with no Latin, Greek, Cyrillic, Armenian, Georgian or Hebrew letter still gets a route, which ends at Bulgarian, with a notice.</li>
       </ul>
 

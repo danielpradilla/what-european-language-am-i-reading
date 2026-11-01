@@ -4,9 +4,9 @@ const imp = (p) => import(`./${p}?v=${V}`);
 const json = (p) => fetch(`${p}?v=${V}`).then((r) => r.json());
 const $ = (s) => document.querySelector(s);
 
-const [engineMod, storageMod, audioMod, boardMod, panelMod, urlMod, uiMod, commonMod, flagMod, mazeMod, detectMod, steerMod, arcadeMod, chart, flags, samples] = await Promise.all([
+const [engineMod, storageMod, audioMod, boardMod, panelMod, urlMod, uiMod, commonMod, flagMod, steerMod, detectMod, roundsMod, arcadeMod, chart, flags, samples] = await Promise.all([
   imp('engine.js'), imp('storage.js'), imp('audio.js'), imp('board.js'), imp('text-panel.js'), imp('url-text.js'), imp('ui.js'), imp('page-common.js'), imp('flag-svg.js'),
-  imp('modes/maze.js'), imp('modes/detect.js'), imp('modes/steer.js'), imp('modes/arcade.js'),
+  imp('modes/steer.js'), imp('modes/detect.js'), imp('modes/rounds.js'), imp('modes/arcade.js'),
   json('src/data/chart.json'), json('assets/flags/flags.json'), json('data/samples.json'),
 ]);
 
@@ -25,19 +25,18 @@ let mode = null;
 commonMod.setupText(ctx, { panelMod, urlMod, onInput: (text, info) => modes[mode]?.onText(text, info) });
 const { panel } = ctx;
 ctx.loadText = (text, m = 'detect') => { if (mode !== m) setMode(m); ctx.setMeta(null); panel.setText(text); };
-ctx.refreshFog = () => modes.maze.refreshFog();
+ctx.refreshFog = () => modes.steer.refreshFog();
 
 // ---------- modes ----------
-const steer = steerMod.createSteer(ctx);
+const rounds = roundsMod.createRounds(ctx);
 const modes = {
-  maze: mazeMod.createMaze(ctx),
+  steer: steerMod.createSteer(ctx),
   detect: detectMod.createDetect(ctx),
-  steer,
-  arcade: arcadeMod.createArcade(ctx, steer),
+  arcade: arcadeMod.createArcade(ctx, rounds),
 };
 const app = $('#app');
 const tabs = [...document.querySelectorAll('#tabs [data-mode]')];
-const NAMES = { maze: 'Maze', detect: 'Detect', steer: 'Steer', arcade: 'Arcade' };
+const NAMES = { steer: 'Steer', detect: 'Detect', arcade: 'Arcade' };
 
 function setMode(m) {
   if (m === mode) return;
@@ -56,7 +55,7 @@ function setMode(m) {
 tabs.forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode)));
 
 // ---------- keys ----------
-const MODE_KEYS = { 1: 'maze', 2: 'detect', 3: 'steer', 4: 'arcade' };
+const MODE_KEYS = { 1: 'steer', 2: 'detect', 3: 'arcade' };
 addEventListener('keydown', (e) => {
   if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
   const t = e.target;
@@ -82,14 +81,13 @@ $('#btn-zoom-out').addEventListener('click', () => board.zoomBy(0.8));
 $('#btn-collection').addEventListener('click', () => ui.openCollection());
 $('#btn-options').addEventListener('click', () => { ctx.menuReturn = false; ui.openMenu('options'); });
 $('#btn-about').addEventListener('click', () => ui.open($('#dlg-about')));
-$('#btn-hint').addEventListener('click', () => steer.hint());
+$('#btn-hint').addEventListener('click', () => rounds.hint());
 $('#pad').addEventListener('click', (e) => {
   const b = e.target.closest('[data-act]');
   if (!b) return;
   const key = { y: 'y', n: 'n', back: 'Backspace' }[b.dataset.act];
   modes[mode].key?.({ key, preventDefault() {} });
 });
-$('#btn-next').addEventListener('click', () => { if (mode === 'steer') ctx.loadRandomSample(); });
 
 // ---------- layout: phone bottom sheet ----------
 const { layout } = commonMod.setupSheet();
@@ -97,7 +95,8 @@ const { layout } = commonMod.setupSheet();
 // ---------- start ----------
 ui.updateCount();
 const deepLang = location.hash.match(/^#lang=([\w-]+)$/)?.[1]; // from the Europe map: open that language's card
-const start = (location.hash.slice(1) in modes) ? location.hash.slice(1) : 'detect';
+const hash = location.hash.slice(1) === 'maze' ? 'steer' : location.hash.slice(1); // old name of Steer
+const start = (hash in modes) ? hash : 'detect';
 board.overview(true);
 setMode(start);
 if (deepLang && chart.leaves[deepLang]) ui.showCard(deepLang);

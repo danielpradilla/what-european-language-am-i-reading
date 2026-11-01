@@ -6,10 +6,9 @@ Play it at [danielpradilla.info/projects/what-european-language-am-i-reading](ht
 
 ## Modes
 
+- **Steer**: walk the chart freely with the arrow keys, Y and N, or by tapping. The snake tells what each station tests and which languages each line leads to. Reaching a flag adds it to your collection.
 - **Detect**: paste or type a text, or fetch one from a URL. The snake follows the chart's rules and the letters that decided each turn are highlighted in the text.
-- **Steer**: you move the snake yourself. A wrong turn shows which letter you missed, or that the letter you expected is not in the text.
-- **Maze**: walk the chart freely with the arrow keys or by tapping, and see which languages each line leads to.
-- **Arcade**: real text samples against the clock, with lives, streaks and a local high-score table.
+- **Arcade**: steer the snake through real text samples against the clock; a wrong turn shows the letter you missed, with lives, streaks and a local high-score table.
 
 The chart sorts languages by the letters they use, not by family or geography. Short or unusual texts can take odd routes; the app follows the chart exactly and shows why.
 

@@ -48,19 +48,15 @@ body { overflow-x: clip; }
 .pad { display: none; position: absolute; right: 10px; bottom: 12px; gap: 10px; }
 .pad .btn { min-width: 60px; min-height: 60px; font-size: 1.4rem; }
 .pad .btn-small { font-size: 1rem; min-width: 56px; }
-/* Steer and Arcade need their Y/N buttons everywhere; Maze has buttons in its panel, so its pad is for touch only. */
+/* Steer and Arcade need their Y/N buttons everywhere. Back is for Steer only; at a flag only Back stays. */
 [data-mode="steer"] .pad, [data-mode="arcade"] .pad { display: flex; }
-[data-mode="steer"] .pad [data-act="back"], [data-mode="arcade"] .pad [data-act="back"] { display: none; }
+[data-mode="arcade"] .pad [data-act="back"], .pad[data-leaf] [data-act="y"], .pad[data-leaf] [data-act="n"] { display: none; }
 .pad .btn .dir { margin-left: 4px; font-size: 0.8em; }
 .pad { flex-wrap: wrap; justify-content: flex-end; align-items: flex-end; max-width: calc(100% - 20px); }
 .pad-q { display: none; flex-basis: 100%; margin: 0; text-align: right; }
 .pad-q:not(:empty) { display: block; }
 .pad-q span { display: inline-block; padding: 3px 10px; font: 700 0.95rem/1.3 var(--font-ui); color: var(--ink); background: var(--card); border: var(--line) solid var(--ink); border-radius: var(--cut); box-shadow: 2px 2px 0 var(--ink); }
 .pad-q b { font: 700 1.2rem/1 var(--noto); }
-[data-mode="maze"] .pad-q { display: none; }
-@media (pointer: coarse), (max-width: 899px) {
-  [data-mode="maze"] .pad { display: flex; }
-}
 
 /* ---------- board drawing ---------- */
 .edge-ink, .edge-fill, .edge-hl { fill: none; stroke-linecap: round; stroke-linejoin: round; }
@@ -177,12 +173,13 @@ body { overflow-x: clip; }
 .found-line .btn { margin-left: auto; }
 .why-out:empty { display: none; }
 .steer-actions kbd { margin-left: 4px; }
+[data-mode="steer"] .steer-actions, [data-mode="steer"] #steer-result { display: none; }
 .seq-inline { font-family: var(--noto); font-size: 1.15em; padding: 0 4px; background: var(--paper-deep); border: var(--line-fine) solid var(--ink); border-radius: 4px; }
 .dialogue { grid-template-columns: 72px 1fr; }
 .portrait { width: 72px; font-size: 1.1rem; }
 .portrait span { padding: 0 4px; }
 .replay summary { cursor: pointer; font-weight: 800; margin-bottom: 6px; }
-.maze-leaf { display: flex; align-items: center; gap: 16px; }
+.leaf-line { display: flex; align-items: center; gap: 16px; }
 .big-seqs { display: flex; flex-wrap: wrap; gap: 8px 16px; }
 .big-seq { display: grid; justify-items: center; gap: 2px; }
 .big-seq .g { font: 700 2.6rem/1.1 var(--noto); }
@@ -270,11 +267,11 @@ button.stage-card { font: inherit; text-align: left; background: none; border: 0
 .callout rect { fill: var(--card); stroke: var(--red); stroke-width: 1.8; }
 .callout text { font: 700 8.4px var(--noto); fill: var(--red-deep); text-decoration: line-through 1.4px var(--red); }
 @media (max-width: 899px) {
-  .segmented kbd, .steer-actions kbd { display: none; }
+  .segmented kbd, .steer-actions kbd, .bubble kbd { display: none; }
   .toasts { top: auto; bottom: calc(var(--peek, 30dvh) + 10px); right: 8px; left: 8px; z-index: 300; }
   .toast { max-width: none; }
 }
-@media (pointer: coarse) { .segmented kbd, .steer-actions kbd { display: none; } }
+@media (pointer: coarse) { .segmented kbd, .steer-actions kbd, .bubble kbd { display: none; } }
 .seq-inline { white-space: nowrap; }
 @media (max-width: 600px) {
   .coll-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
