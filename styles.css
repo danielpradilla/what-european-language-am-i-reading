@@ -413,3 +413,12 @@ button.lg-main:hover, button.lg-main:focus-visible { background: var(--paper-dee
   .eu-chip { top: 46px; }
   .sheet-handle { min-height: 40px; }
 }
+
+/* Full-screen board (button ⤢ or F): the board panel covers the window; on browsers with the Fullscreen API it also
+   hides the browser's bars. The inline height the phone sheet sets is overridden. */
+.board-panel.is-full { position: fixed; inset: 0; z-index: 900; width: auto; height: 100dvh !important; margin: 0; padding: 8px; border-radius: 0; background: var(--paper); }
+.board-panel.is-full::before, .board-panel.is-full::after { display: none; }
+.board-panel:fullscreen { height: 100vh !important; }
+html.board-full, html.board-full body { overflow: hidden; }
+html.board-full .side { visibility: hidden; }
+.btn-full { font-size: 1.05rem; }

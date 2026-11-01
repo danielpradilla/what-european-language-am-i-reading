@@ -122,3 +122,26 @@ export function setupSheet() {
   side.dataset.sheet = state;
   return { layout, setSheet };
 }
+
+/** Full-screen board. The class makes the board panel cover the window everywhere (iPhone Safari has no element
+ *  full screen); where the Fullscreen API exists it also hides the browser's own bars. Returns toggle(on?). */
+export function setupFullscreen() {
+  const panel = document.querySelector('.board-panel'), btn = $('#btn-full');
+  const on = () => panel.classList.contains('is-full');
+  function set(v) {
+    if (v === on()) return;
+    panel.classList.toggle('is-full', v);
+    document.documentElement.classList.toggle('board-full', v);
+    btn.setAttribute('aria-pressed', String(v));
+    btn.setAttribute('aria-label', v ? 'Exit full screen' : 'Full screen');
+    btn.title = v ? 'Exit full screen (F)' : 'Full screen (F)';
+    btn.textContent = v ? '✕' : '⤢';
+    if (v && document.fullscreenEnabled) panel.requestFullscreen?.().catch(() => {});
+    if (!v && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    (panel.querySelector('#board') ?? panel).focus({ preventScroll: true });
+  }
+  btn.addEventListener('click', () => set(!on()));
+  // Esc in real full screen leaves it without a key event; follow the browser.
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && on()) set(false); });
+  return (v = !on()) => set(v);
+}

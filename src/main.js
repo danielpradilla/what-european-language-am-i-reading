@@ -68,6 +68,8 @@ addEventListener('keydown', (e) => {
   const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
   if (MODE_KEYS[k]) { setMode(MODE_KEYS[k]); e.preventDefault(); return; }
   if (k === 'o') { board.overview(); e.preventDefault(); return; }
+  if (k === 'f') { fullscreen(); e.preventDefault(); return; }
+  if (k === 'Escape' && document.documentElement.classList.contains('board-full')) { fullscreen(false); e.preventDefault(); return; }
   if (k === 'm') { ui.toggleSound(); e.preventDefault(); return; }
   if (k === '+' || k === '=') { board.zoomBy(1.25); e.preventDefault(); return; }
   if (k === '-') { board.zoomBy(0.8); e.preventDefault(); return; }
@@ -91,6 +93,7 @@ $('#pad').addEventListener('click', (e) => {
 
 // ---------- layout: phone bottom sheet ----------
 const { layout } = commonMod.setupSheet();
+const fullscreen = commonMod.setupFullscreen();
 
 // ---------- start ----------
 ui.updateCount();

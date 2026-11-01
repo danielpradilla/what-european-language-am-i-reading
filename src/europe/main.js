@@ -80,6 +80,8 @@ addEventListener('keydown', (e) => {
   const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
   if (MODE_KEYS[k]) { setMode(MODE_KEYS[k]); e.preventDefault(); return; }
   if (k === 'o') { map.overview(); e.preventDefault(); return; }
+  if (k === 'f') { fullscreen(); e.preventDefault(); return; }
+  if (k === 'Escape' && document.documentElement.classList.contains('board-full')) { fullscreen(false); e.preventDefault(); return; }
   if (k === 'm') { ui.toggleSound(); e.preventDefault(); return; }
   if (k === '+' || k === '=') { map.zoomBy(1.25); e.preventDefault(); return; }
   if (k === '-') { map.zoomBy(0.8); e.preventDefault(); return; }
@@ -97,6 +99,7 @@ $('#btn-about').addEventListener('click', () => ui.open($('#dlg-about')));
 
 // ---------- layout: phone bottom sheet ----------
 const { layout } = commonMod.setupSheet();
+const fullscreen = commonMod.setupFullscreen();
 
 // ---------- start ----------
 ui.updateCount();

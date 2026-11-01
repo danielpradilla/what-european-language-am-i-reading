@@ -211,7 +211,7 @@ The board is SVG, one `<g>` per station and terminal and one `<path>` per edge, 
 
 The snake moves one sub-cell per tick (25 ms by default, faster at higher Arcade levels). At a station it stops and waits for a choice (Steer, Arcade) or continues on its own (Detect playback).
 
-The camera follows the head with easing. `O` or the overview button fits the whole chart on screen. Zoom with pinch, Ctrl + wheel, the scroll wheel once the board has focus (click or tab into it; the page scrolls normally otherwise), or `+` and `-`. A minimap in the corner shows the head's position on the whole chart.
+The camera follows the head with easing. `O` or the overview button fits the whole chart on screen. The ⤢ button or `F` makes the board fill the whole window on both pages (the text panel is hidden until you leave); `F`, Esc or the ✕ button leaves. Where the browser supports the Fullscreen API it also hides the browser's own bars; on iPhone Safari, which has no element full screen, the board fills the page instead. Zoom with pinch, Ctrl + wheel, the scroll wheel once the board has focus (click or tab into it; the page scrolls normally otherwise), or `+` and `-`. A minimap in the corner shows the head's position on the whole chart.
 
 ### 5.4 Flags
 
@@ -318,9 +318,10 @@ Shows the credit from section 1.1 with links to both authors and to the earlier 
 | `H` | (none) | (none) | hint |
 | Space | (none) | (none) | pause |
 | `O` | overview | overview | overview |
+| `F` | full-screen board on or off | full-screen board on or off | full-screen board on or off |
 | `M` | mute | mute | mute |
 | `1` to `3` | switch mode | switch mode | switch mode |
-| Esc | close panel | close panel | close panel, pause |
+| Esc | leave full screen, close panel | leave full screen, close panel | leave full screen, close panel, pause |
 
 Board keys act only when the text panel does not have focus. On touch screens an on-screen pad with Y, N and Back buttons sits over the bottom corner of the board.
 
