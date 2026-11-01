@@ -82,7 +82,7 @@ export function createUi(ctx) {
         </div>
       </div>
       ${extra || ctx.cardExtra?.(code) || ''}
-      ${bus ? `<p>${esc(lf.note)}</p><div class="note note-info"><span>Not on the poster: a regional bus stop on the Europe map.</span></div>` : routeHtml}
+      ${bus ? `<p>${esc(lf.note)}</p>` : routeHtml}
       ${!bus && NOTES[code] ? `<div class="note note-warning"><strong>Chart quirk</strong><span>${NOTES[code]}</span></div>` : ''}
       ${bus ? '' : `<div class="card-min">
         <span class="label">Shortest text that reaches it</span>
